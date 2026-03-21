@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Claude API Tutorial</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+
+<!-- Mobile menu toggle -->
+<button class="menu-toggle" onclick="toggleMenu()">☰</button>
+
+<div class="app">
+
+  <!-- ═══════════════════════════ SIDEBAR ═══════════════════════════ -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🎓</div>
+      <div>
+        <div class="logo-text">Claude API Tutorial</div>
+        <div class="logo-sub">Hands-on Learning</div>
+      </div>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-label"><span>Progress</span><span>0%</span></div>
+      <div class="progress-bar"><div class="progress-fill"></div></div>
+    </div>
+
+    <div class="nav-section-label">Lessons</div>
+    <ul class="nav-list">
+      <li><a class="nav-link active" data-section="intro">
+        <span class="nav-icon">🏠</span>Introduction
+      </a></li>
+      <li><a class="nav-link" data-section="lesson-1">
+        <span class="nav-icon">📡</span>API Fundamentals<span class="nav-badge">L1</span>
+      </a></li>
+      <li><a class="nav-link" data-section="lesson-2">
+        <span class="nav-icon">💬</span>First API Call<span class="nav-badge">L2</span>
+      </a></li>
+      <li><a class="nav-link" data-section="lesson-3">
+        <span class="nav-icon">🤖</span>System Prompts<span class="nav-badge">L3</span>
+      </a></li>
+      <li><a class="nav-link" data-section="lesson-4">
+        <span class="nav-icon">🔄</span>Conversations<span class="nav-badge">L4</span>
+      </a></li>
+      <li><a class="nav-link" data-section="lesson-5">
+        <span class="nav-icon">⚡</span>Streaming<span class="nav-badge">L5</span>
+      </a></li>
+      <li><a class="nav-link" data-section="lesson-6">
+        <span class="nav-icon">🔧</span>Tool Use<span class="nav-badge">L6</span>
+      </a></li>
+      <li><a class="nav-link" data-section="lesson-7">
+        <span class="nav-icon">⚠️</span>Error Handling<span class="nav-badge">L7</span>
+      </a></li>
+      <li><a class="nav-link" data-section="practice">
+        <span class="nav-icon">🎮</span>Practice Zone
+      </a></li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <div class="api-key-label">Anthropic API Key</div>
+      <div class="key-input-row">
+        <input type="password" id="apiKey" placeholder="sk-ant-...">
+        <button id="saveKey">Save</button>
+      </div>
+      <div id="keyStatus" class="key-status warn">Enter your key above</div>
+      <div class="server-status">
+        <span class="status-dot loading" id="serverDot"></span>
+        <span id="serverStatus">Checking server...</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ═══════════════════════════ CONTENT ═══════════════════════════ -->
+  <main class="content">
+
+    <!-- ─────────────────────────────────────────────────────────────── -->
+    <!-- INTRODUCTION                                                     -->
+    <!-- ─────────────────────────────────────────────────────────────── -->
+    <section id="intro" class="lesson-section">
+      <div class="hero">
+        <div class="hero-icon">🎓</div>
+        <h1 class="hero-title">Claude API Tutorial</h1>
+        <p class="hero-sub">Learn to build AI-powered applications with the Anthropic Claude API through interactive examples and hands-on practice.</p>
+        <div class="hero-badges">
+          <span class="badge blue">📚 7 Lessons</span>
+          <span class="badge green">⚡ Interactive Demos</span>
+          <span class="badge mauve">🎮 Practice Zone</span>
+        </div>
+      </div>
+
+      <h3>What You'll Learn</h3>
+      <div class="concept-grid">
+        <div class="concept-card">
+          <h4>📡 REST API Basics</h4>
+          <p>Understand HTTP requests, JSON payloads, authentication, and the structure of API responses.</p>
+        </div>
+        <div class="concept-card">
+          <h4>💬 Messages API</h4>
+          <p>Master the core <code>POST /v1/messages</code> endpoint — the foundation of all Claude interactions.</p>
+        </div>
+        <div class="concept-card">
+          <h4>⚡ Streaming</h4>
+          <p>Display responses in real-time using Server-Sent Events for a better user experience.</p>
+        </div>
+        <div class="concept-card">
+          <h4>🔧 Tool Use</h4>
+          <p>Give Claude the ability to call your functions, creating powerful AI-driven workflows.</p>
+        </div>
+      </div>
+
+      <div class="callout info">
+        <span class="callout-icon">🚀</span>
+        <div class="callout-body">
+          <strong>Quick Start</strong>
+          Run <code>npm install</code> then <code>npm start</code>, then enter your API key in the sidebar. The server status indicator will turn green when ready.
+        </div>
+      </div>
+
+      <h3>Prerequisites</h3>
+      <ul>
+        <li>Basic knowledge of any programming language (Python or JavaScript examples provided)</li>
+        <li>An Anthropic API key — get one at <strong>console.anthropic.com</strong></li>
+        <li>Node.js 18+ installed (for running the demo server)</li>
+      </ul>
+    </section>
+
+    <!-- ─────────────────────────────────────────────────────────────── -->
+    <!-- LESSON 1: API FUNDAMENTALS                                       -->
+    <!-- ─────────────────────────────────────────────────────────────── -->
+    <section id="lesson-1" class="lesson-section">
+      <div class="section-eyebrow">Lesson 1</div>
+      <h2 class="section-title">API Fundamentals</h2>
+      <p class="section-subtitle">Understand what an API is, how HTTP works, and how the Claude API is structured.</p>
+
+      <div class="objectives">
+        <div class="objectives-title">Learning Objectives</div>
+        <div class="objective-item"><span class="obj-check">✓</span>Understand what a REST API is and how HTTP request/response works</div>
+        <div class="objective-item"><span class="obj-check">✓</span>Learn about API keys and authentication</div>
+        <div class="objective-item"><span class="obj-check">✓</span>Understand the structure of the Claude API</div>
+      </div>
+
+      <h3>What is an API?</h3>
+      <p>An <strong>API (Application Programming Interface)</strong> is a set of rules that allows software to communicate with other software. The Claude API lets your code send messages to Claude and receive responses.</p>
+      <p>The Claude API is a <strong>REST API</strong> — it uses standard HTTP methods (like <code>POST</code>) to exchange data in <strong>JSON format</strong>.</p>
+
+      <div class="diagram">  Your Application
+         │
+         │  HTTP POST /v1/messages
+         │  Headers: { "x-api-key": "sk-ant-...", "anthropic-version": "2023-06-01" }
+         │  Body:    { "model": "claude-opus-4-6", "messages": [...] }
+         │
+         ▼
+  ┌─────────────────────┐
+  │   Anthropic's API   │  ←── Processes your request, runs the model
+  └─────────────────────┘
+         │
+         │  HTTP 200 OK
+         │  Body: { "id": "msg_...", "content": [...], "usage": {...} }
+         │
+         ▼
+  Your Application
+  (reads response.content[0].text)</div>
+
+      <h3>Authentication</h3>
+      <p>Every API request needs an <strong>API key</strong> for authentication. Your key proves your identity and tracks usage/billing.</p>
+      <div class="callout danger">
+        <span class="callout-icon">🔒</span>
+        <div class="callout-body">
+          <strong>Never expose your API key!</strong>
+          Do not put your API key in frontend JavaScript, public repositories, or client-side code. Always store it in environment variables (<code>.env</code>) on your server.
+        </div>
+      </div>
+
+      <h3>Required Request Structure</h3>
+      <p>Every Claude API call requires three things:</p>
+      <ul>
+        <li><strong>model</strong> — which Claude model to use (e.g., <code>claude-opus-4-6</code>)</li>
+        <li><strong>max_tokens</strong> — the maximum number of tokens Claude can output</li>
+        <li><strong>messages</strong> — an array of conversation messages</li>
+      </ul>
+
+      <div class="code-block">
+        <div class="code-tabs">
+          <button class="code-tab active" data-lang="python">Python</button>
+          <button class="code-tab" data-lang="javascript">JavaScript</button>
+          <button class="code-tab" data-lang="curl">cURL</button>
+        </div>
+        <div class="code-header"><span class="code-label">Minimal request structure</span><button class="copy-btn">Copy</button></div>
+        <div class="code-panel active" data-lang="python">
+<pre><code class="language-python">import anthropic
+
+client = anthropic.Anthropic()  # reads ANTHROPIC_API_KEY env var
+
+response = client.messages.create(
+    model="claude-opus-4-6",   # required
+    max_tokens=1024,           # required
+    messages=[                  # required
+        {"role": "user", "content": "Hello!"}
+    ]
+)
+
+print(response.content[0].text)  # Claude's reply
+print(response.usage)            # { input_tokens: 10, output_tokens: 25 }
+</code></pre></div>
+        <div class="code-panel" data-lang="javascript">
+<pre><code class="language-javascript">import Anthropic from "@anthropic-ai/sdk";
+
+const client = new Anthropic(); // reads ANTHROPIC_API_KEY env var
+
+const response = await client.messages.create({
+  model: "claude-opus-4-6",    // required
+  max_tokens: 1024,            // required
+  messages: [                   // required
+    { role: "user", content: "Hello!" }
+  ]
+});
+
+console.log(response.content[0].text); // Claude's reply
+console.log(response.usage);           // { input_tokens: 10, output_tokens: 25 }
+</code></pre></div>
+        <div class="code-panel" data-lang="curl">
+<pre><code class="language-bash">curl https://api.anthropic.com/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: $ANTHROPIC_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-opus-4-6",
+    "max_tokens": 1024,
+    "messages": [
+      {"role": "user", "content": "Hello!"}
+    ]
+  }'
+</code></pre></div>
+      </div>
+
+      <h3>Response Structure</h3>
+      <p>The API always returns a JSON object with the same structure:</p>
+      <div class="code-block">
+        <div class="code-header"><span class="code-label">Example API Response</span></div>
+        <div class="code-panel active" data-lang="json">
+<pre><code class="language-json">{
+  "id": "msg_01XFDUDYJgAACzvnptvVoYEL",
+  "type": "message",
+  "role": "assistant",
+  "content": [
+    {
+      "type": "text",
+      "text": "Hello! How can I help you today?"
+    }
+  ],
+  "model": "claude-opus-4-6",
+  "stop_reason": "end_turn",
+  "usage": {
+    "input_tokens": 10,
+    "output_tokens": 12
+  }
+}
+</code></pre></div>
+      </div>
+
+      <h3>Available Models</h3>
+      <div class="concept-grid">
+        <div class="concept-card">
+          <h4>claude-opus-4-6</h4>
+          <p>Most powerful. Best for complex reasoning, nuanced writing, and difficult tasks. Default for this tutorial.</p>
+        </div>
+        <div class="concept-card">
+          <h4>claude-sonnet-4-6</h4>
+          <p>Balanced speed and intelligence. Great for most production use cases.</p>
+        </div>
+        <div class="concept-card">
+          <h4>claude-haiku-4-5</h4>
+          <p>Fastest and most cost-effective. Ideal for simple tasks, classification, and high-volume processing.</p>
+        </div>
+        <div class="concept-card">
+          <h4>Context Window</h4>
+          <p>All models support <strong>200K tokens</strong> (~150,000 words). You pay per input + output token used.</p>
+        </div>
+      </div>
+
+      <div class="takeaways">
+        <div class="takeaways-title">✅ Key Takeaways</div>
+        <ul>
+          <li>The Claude API uses <strong>HTTP POST</strong> to <code>/v1/messages</code></li>
+          <li>Every request needs <code>model</code>, <code>max_tokens</code>, and <code>messages</code></li>
+          <li>Your API key goes in the <code>x-api-key</code> header — never in client-side code</li>
+          <li>Responses always contain <code>content[0].text</code> with Claude's reply</li>
+          <li><strong>Tokens</strong> ≈ 0.75 words — you pay for both input and output tokens</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ─────────────────────────────────────────────────────────────── -->
+    <!-- LESSON 2: FIRST API CALL                                         -->
+    <!-- ─────────────────────────────────────────────────────────────── -->
+    <section id="lesson-2" class="lesson-section">
+      <div class="section-eyebrow">Lesson 2</div>
+      <h2 class="section-title">Your First API Call</h2>
+      <p class="section-subtitle">Make a real API call and inspect the full request and response.</p>
+
+      <h3>Setup</h3>
+      <div class="code-block">
+        <div class="code-tabs">
+          <button class="code-tab active" data-lang="python">Python</button>
+          <button class="code-tab" data-lang="javascript">JavaScript</button>
+        </div>
+        <div class="code-header"><span class="code-label">Installation</span><button class="copy-btn">Copy</button></div>
+        <div class="code-panel active" data-lang="python">
+<pre><code class="language-bash"># Install the SDK
+pip install anthropic
+
+# Set your API key (never hardcode it!)
+export ANTHROPIC_API_KEY="sk-ant-your-key-here"
+</code></pre></div>
+        <div class="code-panel" data-lang="javascript">
+<pre><code class="language-bash"># Install the SDK
+npm install @anthropic-ai/sdk
+
+# Set your API key in .env
+echo "ANTHROPIC_API_KEY=sk-ant-your-key-here" > .env
+</code></pre></div>
+      </div>
+
+      <h3>Sending a Message</h3>
+      <div class="code-block">
+        <div class="code-tabs">
+          <button class="code-tab active" data-lang="python">Python</button>
+          <button class="code-tab" data-lang="javascript">JavaScript</button>
+        </div>
+        <div class="code-header"><span class="code-label">basic_message.py / basic_message.js</span><button class="copy-btn">Copy</button></div>
+        <div class="code-panel active" data-lang="python">
+<pre><code class="language-python">import anthropic
+
+client = anthropic.Anthropic()  # uses ANTHROPIC_API_KEY env var
+
+response = client.messages.create(
+    model="claude-opus-4-6",
+    max_tokens=1024,
+    messages=[
+        {"role": "user", "content": "What are 3 fun facts about octopuses?"}
+    ]
+)
+
+# Access Claude's response text
+text = response.content[0].text
+print(text)
+
+# Inspect metadata
+print(f"Model: {response.model}")
+print(f"Stop reason: {response.stop_reason}")
+print(f"Input tokens: {response.usage.input_tokens}")
+print(f"Output tokens: {response.usage.output_tokens}")
+</code></pre></div>
+        <div class="code-panel" data-lang="javascript">
+<pre><code class="language-javascript">import Anthropic from "@anthropic-ai/sdk";
+
+const client = new Anthropic(); // uses ANTHROPIC_API_KEY env var
+
+const response = await client.messages.create({
+  model: "claude-opus-4-6",
+  max_tokens: 1024,
+  messages: [
+    { role: "user", content: "What are 3 fun facts about octopuses?" }
+  ]
+});
+
+// Access Claude's response text
+const text = response.content[0].text;
+console.log(text);
+
+// Inspect metadata
+console.log(`Model: ${response.model}`);
+console.log(`Stop reason: ${response.stop_reason}`);
+console.log(`Input tokens: ${response.usage.input_tokens}`);
+console.log(`Output tokens: ${response.usage.output_tokens}`);
+</code></pre></div>
+      </div>
+
+      <h3>Understanding Tokens</h3>
+      <div class="concept-grid">
+        <div class="concept-card">
+          <h4>What is a token?</h4>
+          <p>A token is roughly <strong>¾ of a word</strong>. "Hello, world!" ≈ 4 tokens. "The quick brown fox" ≈ 4 tokens.</p>
+        </div>
+        <div class="concept-card">
+          <h4>max_tokens</h4>
+          <p>Sets the <em>maximum</em> output length. Claude stops when it finishes OR hits this limit. Higher = allows longer responses.</p>
+        </div>
+        <div class="concept-card">
+          <h4>stop_reason</h4>
+          <p><code>"end_turn"</code> = Claude finished naturally. <code>"max_tokens"</code> = Claude was cut off. Always check this!</p>
+        </div>
+        <div class="concept-card">
+          <h4>Cost calculation</h4>
+          <p>Cost = (input_tokens × input_price + output_tokens × output_price). Opus 4.6: $5/1M input, $25/1M output.</p>
+        </div>
+      </div>
+
+      <!-- INTERACTIVE DEMO -->
+      <div class="demo-box">
+        <div class="demo-title">Try It: Send a Message</div>
+        <div class="form-row">
+          <label class="form-label">Your Message</label>
+          <textarea id="basicMessage" rows="3" placeholder="Ask Claude anything...">What are 3 fun facts about octopuses?</textarea>
+        </div>
+        <div class="form-row">
+          <label class="form-label">Model</label>
+          <select id="basicModel">
+            <option value="claude-opus-4-6">claude-opus-4-6 (Most powerful)</option>
+            <option value="claude-sonnet-4-6">claude-sonnet-4-6 (Balanced)</option>
+            <option value="claude-haiku-4-5">claude-haiku-4-5 (Fastest)</option>
+          </select>
+        </div>
+        <div class="demo-controls">
+          <button id="basicBtn" class="btn-run" onclick="runBasicDemo()">
+            <span class="btn-text">▶ Send Message</span>
+            <span class="spinner"></span>
+          </button>
+          <span id="basicJsonToggle" class="json-toggle" style="display:none" onclick="toggleBasicJson()">View raw JSON</span>
+        </div>
+        <div id="basicOutput" class="output-area">
+          <div class="output-header">
+            <span>Claude's Response</span>
+          </div>
+          <div id="basicResult" class="output-box"></div>
+          <div id="basicMeta" class="output-meta"></div>
+          <div id="basicJsonPanel" class="json-panel"></div>
+        </div>
+      </div>
+
+      <div class="takeaways">
+        <div class="takeaways-title">✅ Key Takeaways</div>
+        <ul>
+          <li>Use <code>client.messages.create()</code> to send a message</li>
+          <li>Access the response with <code>response.content[0].text</code></li>
+          <li>Always check <code>stop_reason</code> — if <code>"max_tokens"</code>, increase <code>max_tokens</code></li>
+          <li><code>response.usage</code> tells you exactly how many tokens were used (and your cost)</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ─────────────────────────────────────────────────────────────── -->
+    <!-- LESSON 3: SYSTEM PROMPTS                                         -->
+    <!-- ─────────────────────────────────────────────────────────────── -->
+    <section id="lesson-3" class="lesson-section">
+      <div class="section-eyebrow">Lesson 3</div>
+      <h2 class="section-title">System Prompts</h2>
+      <p class="section-subtitle">Control Claude's persona, behavior, and output format using system prompts.</p>
+
+      <h3>What is a System Prompt?</h3>
+      <p>A <strong>system prompt</strong> is a special instruction given <em>before</em> the conversation begins. It tells Claude how to behave — what role to play, what style to use, what to avoid, or how to format output.</p>
+
+      <div class="diagram">Request structure with system prompt:
+
+{
+  "model": "claude-opus-4-6",
+  "max_tokens": 1024,
+  "system": "You are an expert Python teacher...",   ← system prompt
+  "messages": [
+    { "role": "user", "content": "How do I sort a list?" }  ← conversation
+  ]
+}</div>
+
+      <div class="callout tip">
+        <span class="callout-icon">💡</span>
+        <div class="callout-body">
+          <strong>System vs User</strong>
+          The <code>system</code> field is separate from the <code>messages</code> array. It sets the context for the entire conversation. Think of it as giving Claude its job description before it starts working.
+        </div>
+      </div>
+
+      <div class="code-block">
+        <div class="code-tabs">
+          <button class="code-tab active" data-lang="python">Python</button>
+          <button class="code-tab" data-lang="javascript">JavaScript</button>
+        </div>
+        <div class="code-header"><span class="code-label">system_prompt.py / system_prompt.js</span><button class="copy-btn">Copy</button></div>
+        <div class="code-panel active" data-lang="python">
+<pre><code class="language-python">import anthropic
+
+client = anthropic.Anthropic()
+
+# Without system prompt — default Claude behavior
+response_default = client.messages.create(
+    model="claude-opus-4-6",
+    max_tokens=512,
+    messages=[{"role": "user", "content": "Who are you?"}]
+)
+
+# With system prompt — customized behavior
+response_custom = client.messages.create(
+    model="claude-opus-4-6",
+    max_tokens=512,
+    system="You are Max, a sarcastic but helpful robot assistant from the year 2150. You speak in a deadpan tone and occasionally make beep-boop sounds.",
+    messages=[{"role": "user", "content": "Who are you?"}]
+)
+
+print("Default:", response_default.content[0].text)
+print("\nCustom:", response_custom.content[0].text)
+</code></pre></div>
+        <div class="code-panel" data-lang="javascript">
+<pre><code class="language-javascript">import Anthropic from "@anthropic-ai/sdk";
+
+const client = new Anthropic();
+
+// With system prompt — customized behavior
+const response = await client.messages.create({
+  model: "claude-opus-4-6",
+  max_tokens: 512,
+  system: "You are a concise JSON API. Respond only with valid JSON. No prose.",
+  messages: [{ role: "user", content: "Give me a user object for Alice, age 30" }]
+});
+
+// Claude will return structured JSON instead of prose
+const json = JSON.parse(response.content[0].text);
+console.log(json); // { "name": "Alice", "age": 30, ... }
+</code></pre></div>
+      </div>
+
+      <h3>Common System Prompt Patterns</h3>
+      <div class="concept-grid">
+        <div class="concept-card">
+          <h4>🎭 Persona / Role</h4>
+          <p><em>"You are a helpful customer service agent for Acme Corp. You are polite, concise, and escalate unresolved issues."</em></p>
+        </div>
+        <div class="concept-card">
+          <h4>📋 Output Format</h4>
+          <p><em>"Always respond with valid JSON. No markdown, no prose. The JSON must have 'answer' and 'confidence' fields."</em></p>
+        </div>
+        <div class="concept-card">
+          <h4>🎯 Task Instructions</h4>
+          <p><em>"You are a code reviewer. Point out bugs and security issues only. Do not suggest style changes."</em></p>
+        </div>
+        <div class="concept-card">
+          <h4>🚫 Constraints</h4>
+          <p><em>"You only discuss topics related to cooking. If asked about anything else, politely redirect to food-related topics."</em></p>
+        </div>
+      </div>
+
+      <!-- INTERACTIVE DEMO -->
+      <div class="demo-box">
+        <div class="demo-title">Try It: System Prompts in Action</div>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Select a preset or write your own system prompt, then send the same message to see how Claude's behavior changes.</p>
+
+        <div class="form-row">
+          <label class="form-label">Choose a Preset System Prompt</label>
+          <div class="scenario-grid">
+            <button class="btn-scenario" data-preset="pirate" onclick="selectSystemPreset('pirate')">
+              <div class="scenario-name">🏴‍☠️ Pirate</div>
+              <div class="scenario-desc">Responds in pirate speak</div>
+            </button>
+            <button class="btn-scenario" data-preset="teacher" onclick="selectSystemPreset('teacher')">
+              <div class="scenario-name">👨‍🏫 Simple Teacher</div>
+              <div class="scenario-desc">Explains like you're 10</div>
+            </button>
+            <button class="btn-scenario" data-preset="haiku" onclick="selectSystemPreset('haiku')">
+              <div class="scenario-name">🌸 Haiku Only</div>
+              <div class="scenario-desc">Only answers in haiku format</div>
+            </button>
+            <button class="btn-scenario" data-preset="json" onclick="selectSystemPreset('json')">
+              <div class="scenario-name">{ } JSON Mode</div>
+              <div class="scenario-desc">Always returns valid JSON</div>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <label class="form-label">System Prompt (editable)</label>
+          <textarea id="systemPrompt" rows="3" placeholder="Or write your own system prompt..."></textarea>
+        </div>
+        <div class="form-row">
+          <label class="form-label">Message to Send</label>
+          <textarea id="systemMessage" rows="2" placeholder="Ask something...">Tell me about how gravity works.</textarea>
+        </div>
+        <div class="demo-controls">
+          <button id="systemBtn" class="btn-run" onclick="runSystemDemo()">
+            <span class="btn-text">▶ Send Message</span>
+            <span class="spinner"></span>
+          </button>
+        </div>
+        <div id="systemOutput" class="output-area">
+          <div class="output-header"><span>Claude's Response</span></div>
+          <div id="systemResult" class="output-box"></div>
+          <div id="systemMeta" class="output-meta"></div>
+        </div>
+      </div>
+
+      <div class="takeaways">
+        <div class="takeaways-title">✅ Key Takeaways</div>
+        <ul>
+          <li>System prompts go in the <code>system</code> field, separate from <code>messages</code></li>
+          <li>They persist for the entire conversation — set the context once</li>
+          <li>Use them for personas, output formatting, task constraints, and domain focus</li>
+          <li>Be specific — vague system prompts lead to inconsistent behavior</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ─────────────────────────────────────────────────────────────── -->
+    <!-- LESSON 4: MULTI-TURN CONVERSATIONS                               -->
+    <!-- ─────────────────────────────────────────────────────────────── -->
+    <section id="lesson-4" class="lesson-section">
+      <div class="section-eyebrow">Lesson 4</div>
+      <h2 class="section-title">Multi-Turn Conversations</h2>
+      <p class="section-subtitle">Build chatbots by managing conversation history manually — the Claude API is stateless.</p>
+
+      <h3>The Stateless API</h3>
+      <p>Unlike a chatbot UI, the Claude API has <strong>no memory between calls</strong>. Each request is completely independent. To have a multi-turn conversation, you must send the <em>entire conversation history</em> with every request.</p>
+
+      <div class="diagram">Turn 1:  messages: [ {user: "My name is Alice"} ]
+           response: "Hello Alice!"
+
+Turn 2:  messages: [ {user: "My name is Alice"},         ← include ALL history
+                     {assistant: "Hello Alice!"},
+                     {user: "What's my name?"} ]
+           response: "Your name is Alice."   ✓
+
+Turn 2 (wrong):  messages: [ {user: "What's my name?"} ]
+           response: "I don't know your name."  ✗</div>
+
+      <h3>Message Roles</h3>
+      <p>The <code>messages</code> array must follow strict rules:</p>
+      <ul>
+        <li>Messages must <strong>alternate</strong> between <code>"user"</code> and <code>"assistant"</code></li>
+        <li>The <strong>first message</strong> must always be <code>"user"</code></li>
+        <li>You append Claude's responses as <code>"assistant"</code> messages</li>
+      </ul>
+
+      <div class="code-block">
+        <div class="code-tabs">
+          <button class="code-tab active" data-lang="python">Python</button>
+          <button class="code-tab" data-lang="javascript">JavaScript</button>
+        </div>
+        <div class="code-header"><span class="code-label">conversation.py / conversation.js</span><button class="copy-btn">Copy</button></div>
+        <div class="code-panel active" data-lang="python">
+<pre><code class="language-python">import anthropic
+
+client = anthropic.Anthropic()
+messages = []  # Conversation history
+
+def chat(user_message: str) -> str:
+    # Add the new user message
+    messages.append({"role": "user", "content": user_message})
+
+    # Send ALL messages every time
+    response = client.messages.create(
+        model="claude-opus-4-6",
+        max_tokens=1024,
+        messages=messages
+    )
+
+    assistant_reply = response.content[0].text
+
+    # Save Claude's reply so it's included next time
+    messages.append({"role": "assistant", "content": assistant_reply})
+
+    return assistant_reply
+
+# Example conversation
+print(chat("Hi! My favorite color is blue."))
+print(chat("I also love hiking."))
+print(chat("What do you know about me?"))
+# Claude will remember both facts from the conversation history
+</code></pre></div>
+        <div class="code-panel" data-lang="javascript">
+<pre><code class="language-javascript">import Anthropic from "@anthropic-ai/sdk";
+
+const client = new Anthropic();
+const messages = []; // Conversation history
+
+async function chat(userMessage) {
+  // Add the new user message
+  messages.push({ role: "user", content: userMessage });
+
+  // Send ALL messages every time
+  const response = await client.messages.create({
+    model: "claude-opus-4-6",
+    max_tokens: 1024,
+    messages: messages,
+  });
+
+  const assistantReply = response.content[0].text;
+
+  // Save Claude's reply for next turn
+  messages.push({ role: "assistant", content: assistantReply });
+
+  return assistantReply;
+}
+
+// Example conversation
+console.log(await chat("Hi! My favorite color is blue."));
+console.log(await chat("I also love hiking."));
+console.log(await chat("What do you know about me?"));
+</code></pre></div>
+      </div>
+
+      <div class="callout warn">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-body">
+          <strong>Context Window Limits</strong>
+          Long conversations grow the token count. All models support 200K tokens (≈150K words), but very long histories increase cost and latency. For production apps, consider summarizing old messages or using a sliding window.
+        </div>
+      </div>
+
+      <!-- INTERACTIVE DEMO -->
+      <div class="demo-box">
+        <div class="demo-title">Try It: Multi-Turn Chat</div>
+        <div class="form-row">
+          <label class="form-label">System Prompt (optional)</label>
+          <input type="text" id="chatSystem" placeholder="e.g. You are a helpful Python tutor.">
+        </div>
+        <div class="chat-window">
+          <div id="chatMessages" class="chat-messages">
+            <p class="chat-empty">Send a message to start the conversation!</p>
+          </div>
+          <div class="chat-input-row">
+            <input type="text" id="chatInput" placeholder="Type a message..." onkeydown="chatKeydown(event)">
+            <button id="chatSendBtn" class="btn-send" onclick="sendChatMessage()">↑</button>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;margin-top:8px">
+          <button class="btn-secondary" onclick="clearChat()">Clear Chat</button>
+          <span id="chatCounter" style="font-size:12px;color:var(--muted)">0 messages</span>
+        </div>
+      </div>
+
+      <div class="takeaways">
+        <div class="takeaways-title">✅ Key Takeaways</div>
+        <ul>
+          <li>The API is <strong>stateless</strong> — send all history on every request</li>
+          <li>Messages must <strong>alternate user/assistant</strong>, starting with <code>user</code></li>
+          <li>Append Claude's <code>response.content[0].text</code> back to your history as an <code>assistant</code> message</li>
+          <li>Watch the <code>usage.input_tokens</code> — it grows with conversation length</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ─────────────────────────────────────────────────────────────── -->
+    <!-- LESSON 5: STREAMING                                              -->
+    <!-- ─────────────────────────────────────────────────────────────── -->
+    <section id="lesson-5" class="lesson-section">
+      <div class="section-eyebrow">Lesson 5</div>
+      <h2 class="section-title">Streaming</h2>
+      <p class="section-subtitle">Display Claude's response word-by-word in real-time using Server-Sent Events.</p>
+
+      <h3>Why Streaming?</h3>
+      <div class="concept-grid">
+        <div class="concept-card">
+          <h4>⚡ Better UX</h4>
+          <p>Users see text appearing immediately rather than waiting for the full response. Feels much faster even if total time is the same.</p>
+        </div>
+        <div class="concept-card">
+          <h4>⏱️ No Timeouts</h4>
+          <p>Long responses (e.g. with <code>max_tokens=8192</code>) can take 30+ seconds. Streaming prevents HTTP request timeouts.</p>
+        </div>
+        <div class="concept-card">
+          <h4>📡 How it Works</h4>
+          <p>Claude sends <strong>Server-Sent Events (SSE)</strong> — a stream of JSON events over a single HTTP connection.</p>
+        </div>
+        <div class="concept-card">
+          <h4>🎛️ Stream Events</h4>
+          <p><code>message_start</code> → <code>content_block_delta</code> (x many) → <code>message_delta</code> → <code>message_stop</code></p>
+        </div>
+      </div>
+
+      <div class="code-block">
+        <div class="code-tabs">
+          <button class="code-tab active" data-lang="python">Python</button>
+          <button class="code-tab" data-lang="javascript">JavaScript</button>
+        </div>
+        <div class="code-header"><span class="code-label">streaming.py / streaming.js</span><button class="copy-btn">Copy</button></div>
+        <div class="code-panel active" data-lang="python">
+<pre><code class="language-python">import anthropic
+
+client = anthropic.Anthropic()
+
+# Method 1: Simple text stream (easiest)
+with client.messages.stream(
+    model="claude-opus-4-6",
+    max_tokens=1024,
+    messages=[{"role": "user", "content": "Write a short poem about the ocean"}]
+) as stream:
+    for text in stream.text_stream:
+        print(text, end="", flush=True)  # Print each token as it arrives
+
+# After streaming, get the complete message with metadata
+final_message = stream.get_final_message()
+print(f"\n\nTokens used: {final_message.usage.output_tokens}")
+
+# Method 2: Raw events (for more control)
+with client.messages.stream(
+    model="claude-opus-4-6",
+    max_tokens=1024,
+    messages=[{"role": "user", "content": "Write a haiku"}]
+) as stream:
+    for event in stream:
+        if event.type == "content_block_delta":
+            if event.delta.type == "text_delta":
+                print(event.delta.text, end="", flush=True)
+</code></pre></div>
+        <div class="code-panel" data-lang="javascript">
+<pre><code class="language-javascript">import Anthropic from "@anthropic-ai/sdk";
+
+const client = new Anthropic();
+
+// Stream and display tokens in real time
+const stream = client.messages.stream({
+  model: "claude-opus-4-6",
+  max_tokens: 1024,
+  messages: [{ role: "user", content: "Write a short poem about the ocean" }],
+});
+
+// Listen for text tokens
+for await (const event of stream) {
+  if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
+    process.stdout.write(event.delta.text); // or append to DOM element
+  }
+}
+
+// Get final message (includes usage stats)
+const finalMessage = await stream.finalMessage();
+console.log(`\n\nTotal tokens: ${finalMessage.usage.output_tokens}`);
+</code></pre></div>
+      </div>
+
+      <h3>Stream Events Reference</h3>
+      <table class="error-table">
+        <thead><tr><th>Event Type</th><th>When it fires</th><th>What to do</th></tr></thead>
+        <tbody>
+          <tr><td><code class="code-tag e4">message_start</code></td><td>Once at the beginning</td><td>Get the message ID</td></tr>
+          <tr><td><code class="code-tag e4">content_block_start</code></td><td>When a content block begins</td><td>Note the block type (text, tool_use)</td></tr>
+          <tr><td><code class="code-tag yes">content_block_delta</code></td><td>For each token/chunk</td><td><strong>Append <code>delta.text</code> to your output</strong></td></tr>
+          <tr><td><code class="code-tag e4">content_block_stop</code></td><td>When a block finishes</td><td>Finalize the block</td></tr>
+          <tr><td><code class="code-tag yes">message_delta</code></td><td>Near the end</td><td>Get <code>stop_reason</code> and token usage</td></tr>
+          <tr><td><code class="code-tag e4">message_stop</code></td><td>Stream is complete</td><td>Clean up, update UI</td></tr>
+        </tbody>
+      </table>
+
+      <!-- INTERACTIVE DEMO -->
+      <div class="demo-box">
+        <div class="demo-title">Try It: Watch Claude Stream in Real-Time</div>
+        <div class="form-row">
+          <label class="form-label">Prompt (choose something that generates a longer response)</label>
+          <textarea id="streamMessage" rows="2">Write a short story about a robot who discovers music for the first time.</textarea>
+        </div>
+        <div class="demo-controls">
+          <button id="streamBtn" class="btn-run" onclick="runStreamDemo()">
+            <span class="btn-text">⚡ Stream Response</span>
+            <span class="spinner"></span>
+          </button>
+        </div>
+        <div id="streamOutput" class="output-area">
+          <div class="output-header"><span>Streaming Response</span></div>
+          <div id="streamResult" class="output-box"></div>
+          <div id="streamMeta" class="output-meta"></div>
+          <details style="margin-top:12px">
+            <summary style="font-size:12px;color:var(--muted);cursor:pointer">Show event log</summary>
+            <div id="streamEvents" style="margin-top:8px;padding:10px;background:var(--bg);border:1px solid var(--surface2);border-radius:6px;max-height:150px;overflow-y:auto;font-family:var(--mono);font-size:11px"></div>
+          </details>
+        </div>
+      </div>
+
+      <div class="takeaways">
+        <div class="takeaways-title">✅ Key Takeaways</div>
+        <ul>
+          <li>Use <code>client.messages.stream()</code> instead of <code>client.messages.create()</code></li>
+          <li>Listen for <code>content_block_delta</code> events and append <code>delta.text</code> to your output</li>
+          <li>Call <code>stream.get_final_message()</code> / <code>stream.finalMessage()</code> after the loop to get usage stats</li>
+          <li>Always stream when <code>max_tokens</code> is large (>2000) to avoid HTTP timeouts</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ─────────────────────────────────────────────────────────────── -->
+    <!-- LESSON 6: TOOL USE                                               -->
+    <!-- ─────────────────────────────────────────────────────────────── -->
+    <section id="lesson-6" class="lesson-section">
+      <div class="section-eyebrow">Lesson 6</div>
+      <h2 class="section-title">Tool Use (Function Calling)</h2>
+      <p class="section-subtitle">Give Claude the ability to call your functions, enabling it to fetch live data and take actions.</p>
+
+      <h3>What Are Tools?</h3>
+      <p>Tools (also called <strong>function calling</strong>) let you describe functions to Claude. When Claude needs information or wants to perform an action, it asks you to call one of those functions — then you run it and return the result.</p>
+
+      <div class="diagram">You define tools:  get_weather(city), calculate(expr)
+                        │
+User: "What's the weather in Tokyo?"
+                        │
+                        ▼
+1. Claude → API response: { stop_reason: "tool_use",
+                             tool_use: { name: "get_weather", input: { city: "Tokyo" } } }
+                        │
+2. YOUR CODE runs get_weather("Tokyo") → returns "18°C, cloudy"
+                        │
+3. You send result back:  { role: "user",
+                            content: [{ type: "tool_result",
+                                        tool_use_id: "...",
+                                        content: "18°C, cloudy" }] }
+                        │
+                        ▼
+4. Claude → "The weather in Tokyo is 18°C and cloudy." ✓</div>
+
+      <h3>Defining a Tool</h3>
+      <div class="code-block">
+        <div class="code-tabs">
+          <button class="code-tab active" data-lang="python">Python</button>
+          <button class="code-tab" data-lang="javascript">JavaScript</button>
+        </div>
+        <div class="code-header"><span class="code-label">tool_definition.py / tool_definition.js</span><button class="copy-btn">Copy</button></div>
+        <div class="code-panel active" data-lang="python">
+<pre><code class="language-python">import anthropic
+import json
+
+client = anthropic.Anthropic()
+
+# 1. Define your tools using JSON Schema
+tools = [
+    {
+        "name": "get_weather",
+        "description": "Get the current weather for a city",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "city": {
+                    "type": "string",
+                    "description": "City name, e.g. 'Tokyo'"
+                },
+                "unit": {
+                    "type": "string",
+                    "enum": ["celsius", "fahrenheit"],
+                    "description": "Temperature unit"
+                }
+            },
+            "required": ["city"]
+        }
+    }
+]
+
+# 2. Your actual tool implementation
+def get_weather(city: str, unit: str = "celsius") -> str:
+    # In real code, call a weather API here
+    return f"Weather in {city}: 22°C, partly cloudy"
+
+# 3. The agentic loop
+messages = [{"role": "user", "content": "What's the weather in Tokyo?"}]
+
+while True:
+    response = client.messages.create(
+        model="claude-opus-4-6",
+        max_tokens=1024,
+        tools=tools,
+        messages=messages
+    )
+
+    if response.stop_reason == "end_turn":
+        print(response.content[0].text)
+        break
+
+    # Claude wants to call a tool
+    messages.append({"role": "assistant", "content": response.content})
+
+    tool_results = []
+    for block in response.content:
+        if block.type == "tool_use":
+            result = get_weather(**block.input)
+            tool_results.append({
+                "type": "tool_result",
+                "tool_use_id": block.id,
+                "content": result
+            })
+
+    messages.append({"role": "user", "content": tool_results})
+</code></pre></div>
+        <div class="code-panel" data-lang="javascript">
+<pre><code class="language-javascript">import Anthropic from "@anthropic-ai/sdk";
+
+const client = new Anthropic();
+
+// 1. Define your tools using JSON Schema
+const tools = [{
+  name: "get_weather",
+  description: "Get the current weather for a city",
+  input_schema: {
+    type: "object",
+    properties: {
+      city: { type: "string", description: "City name, e.g. 'Tokyo'" },
+      unit: { type: "string", enum: ["celsius", "fahrenheit"] }
+    },
+    required: ["city"]
+  }
+}];
+
+// 2. Your actual tool implementation
+function getWeather({ city, unit = "celsius" }) {
+  return `Weather in ${city}: 22°C, partly cloudy`; // call real API here
+}
+
+// 3. The agentic loop
+const messages = [{ role: "user", content: "What's the weather in Tokyo?" }];
+
+while (true) {
+  const response = await client.messages.create({
+    model: "claude-opus-4-6",
+    max_tokens: 1024,
+    tools,
+    messages,
+  });
+
+  if (response.stop_reason === "end_turn") {
+    console.log(response.content[0].text);
+    break;
+  }
+
+  messages.push({ role: "assistant", content: response.content });
+
+  const toolResults = response.content
+    .filter(b => b.type === "tool_use")
+    .map(b => ({
+      type: "tool_result",
+      tool_use_id: b.id,
+      content: getWeather(b.input),
+    }));
+
+  messages.push({ role: "user", content: toolResults });
+}
+</code></pre></div>
+      </div>
+
+      <div class="callout info">
+        <span class="callout-icon">🔧</span>
+        <div class="callout-body">
+          <strong>Tool Runner (Beta)</strong>
+          The Anthropic SDK has a <code>tool_runner</code> / <code>toolRunner</code> that handles the loop automatically. Use it if you don't need custom logic between tool calls. See the <a href="https://docs.anthropic.com" target="_blank" style="color:var(--blue)">SDK docs</a> for details.
+        </div>
+      </div>
+
+      <!-- INTERACTIVE DEMO -->
+      <div class="demo-box">
+        <div class="demo-title">Try It: Watch the Agentic Loop</div>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:14px">This demo has two tools: <code>get_weather(city)</code> and <code>calculate(expression)</code>. Ask Claude to use them!</p>
+
+        <div class="form-row">
+          <label class="form-label">Quick Examples</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn-secondary" data-query="weather" onclick="setToolQuery('weather')">🌤 Weather Query</button>
+            <button class="btn-secondary" data-query="calc" onclick="setToolQuery('calc')">🔢 Math Calculation</button>
+            <button class="btn-secondary" data-query="combined" onclick="setToolQuery('combined')">🔀 Combined</button>
+          </div>
+        </div>
+        <div class="form-row">
+          <label class="form-label">Your Query</label>
+          <textarea id="toolQuery" rows="2" placeholder="e.g. What is the weather in Paris and what is 25 * 4?">What is the weather in Tokyo and Paris?</textarea>
+        </div>
+        <div class="demo-controls">
+          <button id="toolsBtn" class="btn-run" onclick="runToolsDemo()">
+            <span class="btn-text">🔧 Run Agentic Loop</span>
+            <span class="spinner"></span>
+          </button>
+        </div>
+        <div id="toolsOutput" class="output-area">
+          <div class="output-header"><span>Agentic Loop Steps</span></div>
+          <div id="toolSteps" class="tool-steps"></div>
+          <div style="margin-top:14px;padding:14px;background:var(--green-dim);border:1px solid var(--green);border-radius:6px">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--green);margin-bottom:6px">Final Answer</div>
+            <div id="toolAnswer" style="font-size:14px;color:var(--text)"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="takeaways">
+        <div class="takeaways-title">✅ Key Takeaways</div>
+        <ul>
+          <li>Define tools with a <strong>name</strong>, <strong>description</strong>, and <strong>input_schema</strong> (JSON Schema)</li>
+          <li>When <code>stop_reason === "tool_use"</code>, Claude wants you to run a function</li>
+          <li>Loop until <code>stop_reason === "end_turn"</code> — this is the <strong>agentic loop</strong></li>
+          <li>Always append both the <code>assistant</code> response and <code>tool_result</code> messages back</li>
+          <li>Write <strong>detailed descriptions</strong> — Claude uses them to decide when and how to call tools</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ─────────────────────────────────────────────────────────────── -->
+    <!-- LESSON 7: ERROR HANDLING                                         -->
+    <!-- ─────────────────────────────────────────────────────────────── -->
+    <section id="lesson-7" class="lesson-section">
+      <div class="section-eyebrow">Lesson 7</div>
+      <h2 class="section-title">Error Handling</h2>
+      <p class="section-subtitle">Handle API errors gracefully to build production-ready applications.</p>
+
+      <h3>Error Types</h3>
+      <table class="error-table">
+        <thead><tr><th>HTTP Code</th><th>Error Type</th><th>Common Cause</th><th>Retryable?</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="code-tag e4">400</span></td>
+            <td>BadRequestError</td>
+            <td>Invalid parameters (e.g. first message is assistant, bad max_tokens)</td>
+            <td><span class="code-tag no">No</span></td>
+          </tr>
+          <tr>
+            <td><span class="code-tag e4">401</span></td>
+            <td>AuthenticationError</td>
+            <td>Missing or invalid API key</td>
+            <td><span class="code-tag no">No</span></td>
+          </tr>
+          <tr>
+            <td><span class="code-tag e4">403</span></td>
+            <td>PermissionDeniedError</td>
+            <td>API key lacks permissions for this feature/model</td>
+            <td><span class="code-tag no">No</span></td>
+          </tr>
+          <tr>
+            <td><span class="code-tag e4">404</span></td>
+            <td>NotFoundError</td>
+            <td>Invalid model ID (typo in model name)</td>
+            <td><span class="code-tag no">No</span></td>
+          </tr>
+          <tr>
+            <td><span class="code-tag e4">429</span></td>
+            <td>RateLimitError</td>
+            <td>Too many requests per minute / too many tokens</td>
+            <td><span class="code-tag yes">Yes</span></td>
+          </tr>
+          <tr>
+            <td><span class="code-tag e5">500</span></td>
+            <td>APIStatusError</td>
+            <td>Temporary Anthropic server issue</td>
+            <td><span class="code-tag yes">Yes</span></td>
+          </tr>
+          <tr>
+            <td><span class="code-tag e5">529</span></td>
+            <td>APIStatusError</td>
+            <td>API overloaded — high traffic period</td>
+            <td><span class="code-tag yes">Yes</span></td>
+          </tr>
+          <tr>
+            <td><span class="code-tag e4">—</span></td>
+            <td>APIConnectionError</td>
+            <td>Network error, no internet connection</td>
+            <td><span class="code-tag yes">Yes</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Handling Errors in Code</h3>
+      <div class="code-block">
+        <div class="code-tabs">
+          <button class="code-tab active" data-lang="python">Python</button>
+          <button class="code-tab" data-lang="javascript">JavaScript</button>
+        </div>
+        <div class="code-header"><span class="code-label">error_handling.py / error_handling.js</span><button class="copy-btn">Copy</button></div>
+        <div class="code-panel active" data-lang="python">
+<pre><code class="language-python">import anthropic
+import time
+
+client = anthropic.Anthropic()
+
+def call_claude(message: str, retries: int = 3) -> str:
+    for attempt in range(retries):
+        try:
+            response = client.messages.create(
+                model="claude-opus-4-6",
+                max_tokens=1024,
+                messages=[{"role": "user", "content": message}]
+            )
+            return response.content[0].text
+
+        except anthropic.AuthenticationError:
+            raise  # Wrong API key — don't retry, fix the key
+
+        except anthropic.BadRequestError as e:
+            raise  # Invalid request — fix your code
+
+        except anthropic.RateLimitError:
+            if attempt < retries - 1:
+                wait = 2 ** attempt  # exponential backoff: 1s, 2s, 4s
+                print(f"Rate limited. Retrying in {wait}s...")
+                time.sleep(wait)
+            else:
+                raise
+
+        except anthropic.APIStatusError as e:
+            if e.status_code >= 500 and attempt < retries - 1:
+                time.sleep(2 ** attempt)  # server error — retry
+            else:
+                raise
+
+        except anthropic.APIConnectionError:
+            if attempt < retries - 1:
+                time.sleep(2 ** attempt)  # network error — retry
+            else:
+                raise
+
+    raise RuntimeError("All retries exhausted")
+</code></pre></div>
+        <div class="code-panel" data-lang="javascript">
+<pre><code class="language-javascript">import Anthropic from "@anthropic-ai/sdk";
+
+const client = new Anthropic();
+
+async function callClaude(message, retries = 3) {
+  for (let attempt = 0; attempt < retries; attempt++) {
+    try {
+      const response = await client.messages.create({
+        model: "claude-opus-4-6",
+        max_tokens: 1024,
+        messages: [{ role: "user", content: message }],
+      });
+      return response.content[0].text;
+
+    } catch (error) {
+      if (error instanceof Anthropic.AuthenticationError) {
+        throw error; // Wrong API key — fix it, don't retry
+
+      } else if (error instanceof Anthropic.RateLimitError) {
+        if (attempt < retries - 1) {
+          const wait = Math.pow(2, attempt) * 1000;
+          console.log(`Rate limited. Retrying in ${wait}ms...`);
+          await new Promise(r => setTimeout(r, wait));
+        } else throw error;
+
+      } else if (error instanceof Anthropic.APIError && error.status >= 500) {
+        if (attempt < retries - 1) {
+          await new Promise(r => setTimeout(r, Math.pow(2, attempt) * 1000));
+        } else throw error;
+
+      } else {
+        throw error; // Other errors — don't retry
+      }
+    }
+  }
+}
+</code></pre></div>
+      </div>
+
+      <div class="callout tip">
+        <span class="callout-icon">💡</span>
+        <div class="callout-body">
+          <strong>SDK Auto-Retry</strong>
+          The Anthropic SDK automatically retries 429 and 5xx errors with exponential backoff (default: 2 retries). Configure with <code>Anthropic(max_retries=5)</code>. Only implement custom retry logic if you need specific behavior.
+        </div>
+      </div>
+
+      <!-- INTERACTIVE DEMO -->
+      <div class="demo-box">
+        <div class="demo-title">Try It: Simulate API Errors</div>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Click a scenario to see what error the API returns and how to handle it.</p>
+        <div class="scenario-grid">
+          <button class="btn-scenario" data-scenario="bad_key" onclick="runErrorDemo('bad_key')">
+            <div class="scenario-name">🔑 Invalid API Key</div>
+            <div class="scenario-desc">401 AuthenticationError</div>
+          </button>
+          <button class="btn-scenario" data-scenario="bad_model" onclick="runErrorDemo('bad_model')">
+            <div class="scenario-name">🤖 Wrong Model Name</div>
+            <div class="scenario-desc">404 NotFoundError</div>
+          </button>
+          <button class="btn-scenario" data-scenario="bad_request" onclick="runErrorDemo('bad_request')">
+            <div class="scenario-name">📋 Bad Request</div>
+            <div class="scenario-desc">400 BadRequestError</div>
+          </button>
+          <button class="btn-scenario" data-scenario="exceed_tokens" onclick="runErrorDemo('exceed_tokens')">
+            <div class="scenario-name">📏 Too Many Tokens</div>
+            <div class="scenario-desc">422 UnprocessableEntity</div>
+          </button>
+        </div>
+        <div id="errorDesc" style="font-size:13px;color:var(--muted);margin-bottom:10px;min-height:18px"></div>
+        <div id="errorOutput" class="output-area">
+          <div id="errorResult"></div>
+        </div>
+      </div>
+
+      <div class="takeaways">
+        <div class="takeaways-title">✅ Key Takeaways</div>
+        <ul>
+          <li><strong>4xx errors</strong> = your fault (bad key, bad request) — fix your code, don't retry blindly</li>
+          <li><strong>5xx errors</strong> = server-side — safe to retry with exponential backoff</li>
+          <li><strong>429 Rate Limit</strong> — retry after delay; check <code>retry-after</code> header</li>
+          <li>The SDK retries 429 + 5xx automatically — configure <code>max_retries</code> as needed</li>
+          <li>Always validate user input before sending to avoid preventable 400 errors</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ─────────────────────────────────────────────────────────────── -->
+    <!-- PRACTICE ZONE                                                    -->
+    <!-- ─────────────────────────────────────────────────────────────── -->
+    <section id="practice" class="lesson-section">
+      <div class="section-eyebrow">Practice Zone</div>
+      <h2 class="section-title">Free Sandbox 🎮</h2>
+      <p class="section-subtitle">Experiment with any combination of options. See the exact request and response JSON.</p>
+
+      <div class="practice-grid">
+        <div class="options-panel">
+          <div class="options-title">⚙️ Request Options</div>
+          <div class="form-row">
+            <label class="form-label">Model</label>
+            <select id="practiceModel">
+              <option value="claude-opus-4-6">claude-opus-4-6</option>
+              <option value="claude-sonnet-4-6">claude-sonnet-4-6</option>
+              <option value="claude-haiku-4-5">claude-haiku-4-5</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label class="form-label">Max Tokens</label>
+            <select id="practiceTokens">
+              <option value="256">256</option>
+              <option value="512">512</option>
+              <option value="1024" selected>1024</option>
+              <option value="2048">2048</option>
+              <option value="4096">4096</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label class="form-label">System Prompt (optional)</label>
+            <textarea id="practiceSystem" rows="3" placeholder="You are a helpful assistant..."></textarea>
+          </div>
+        </div>
+        <div class="options-panel">
+          <div class="options-title">💬 Messages</div>
+          <div id="practiceMessages">
+            <div class="practice-msg" style="margin-bottom:10px">
+              <div style="display:flex;gap:8px;align-items:center;margin-bottom:5px">
+                <select data-role style="width:120px;padding:6px">
+                  <option value="user" selected>user</option>
+                  <option value="assistant">assistant</option>
+                </select>
+              </div>
+              <textarea data-content rows="2" placeholder="Your message...">Explain APIs in simple terms using a restaurant analogy.</textarea>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="btn-secondary" onclick="addPracticeMessage('user')">+ user</button>
+            <button class="btn-secondary" onclick="addPracticeMessage('assistant')">+ assistant</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo-controls" style="margin-bottom:16px">
+        <button id="practiceBtn" class="btn-run" onclick="runPractice()">
+          <span class="btn-text">▶ Send Request</span>
+          <span class="spinner"></span>
+        </button>
+      </div>
+
+      <div id="practiceOutput" class="output-area">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div>
+            <div class="output-header" style="margin-bottom:8px"><span>📤 Request JSON</span></div>
+            <div id="practiceRequest" class="json-panel" style="display:block;max-height:200px"></div>
+          </div>
+          <div>
+            <div class="output-header" style="margin-bottom:8px"><span>📥 Response JSON</span></div>
+            <div id="practiceResponse" class="json-panel" style="display:block;max-height:200px"></div>
+          </div>
+        </div>
+        <div class="output-header" style="margin:14px 0 8px"><span>Claude's Response</span></div>
+        <div id="practiceResult" class="output-box"></div>
+        <div id="practiceMeta" class="output-meta"></div>
+      </div>
+
+      <!-- Quick exercises -->
+      <h3 style="margin-top:40px">💡 Practice Exercises</h3>
+      <div class="concept-grid">
+        <div class="concept-card">
+          <h4>Exercise 1: Persona</h4>
+          <p>Set a system prompt to make Claude act as a Shakespearean actor. Ask it to describe a modern smartphone.</p>
+        </div>
+        <div class="concept-card">
+          <h4>Exercise 2: JSON Output</h4>
+          <p>Set system prompt to: <em>"Only respond with JSON"</em>. Ask Claude to create a profile for a fictional character.</p>
+        </div>
+        <div class="concept-card">
+          <h4>Exercise 3: Multi-Turn</h4>
+          <p>Add an assistant message and a follow-up user message. See how Claude maintains context across turns.</p>
+        </div>
+        <div class="concept-card">
+          <h4>Exercise 4: Token Count</h4>
+          <p>Set max_tokens to 50 and ask a long question. Notice how <code>stop_reason: "max_tokens"</code> truncates the response.</p>
+        </div>
+      </div>
+    </section>
+
+  </main><!-- end .content -->
+</div><!-- end .app -->
+
+<!-- Prism.js syntax highlighting -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
