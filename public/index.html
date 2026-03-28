@@ -34,6 +34,9 @@
       <li><a class="nav-link active" data-section="intro">
         <span class="nav-icon">🏠</span>Introduction
       </a></li>
+      <li><a class="nav-link" data-section="rest-fundamentals">
+        <span class="nav-icon">🌐</span>REST Fundamentals<span class="nav-badge">L0</span>
+      </a></li>
       <li><a class="nav-link" data-section="lesson-1">
         <span class="nav-icon">📡</span>API Fundamentals<span class="nav-badge">L1</span>
       </a></li>
@@ -55,8 +58,14 @@
       <li><a class="nav-link" data-section="lesson-7">
         <span class="nav-icon">⚠️</span>Error Handling<span class="nav-badge">L7</span>
       </a></li>
+      <li><a class="nav-link" data-section="autodesk-acc">
+        <span class="nav-icon">🏗️</span>Autodesk ACC<span class="nav-badge">L8</span>
+      </a></li>
       <li><a class="nav-link" data-section="practice">
         <span class="nav-icon">🎮</span>Practice Zone
+      </a></li>
+      <li><a class="nav-link" data-section="python-tutorial">
+        <span class="nav-icon">🐍</span>Python Scripts
       </a></li>
     </ul>
 
@@ -86,7 +95,7 @@
         <h1 class="hero-title">Claude API Tutorial</h1>
         <p class="hero-sub">Learn to build AI-powered applications with the Anthropic Claude API through interactive examples and hands-on practice.</p>
         <div class="hero-badges">
-          <span class="badge blue">📚 7 Lessons</span>
+          <span class="badge blue">📚 9 Lessons</span>
           <span class="badge green">⚡ Interactive Demos</span>
           <span class="badge mauve">🎮 Practice Zone</span>
         </div>
@@ -126,6 +135,172 @@
         <li>An Anthropic API key — get one at <strong>console.anthropic.com</strong></li>
         <li>Node.js 18+ installed (for running the demo server)</li>
       </ul>
+    </section>
+
+    <!-- ─────────────────────────────────────────────────────────────── -->
+    <!-- LESSON 0: REST FUNDAMENTALS                                       -->
+    <!-- ─────────────────────────────────────────────────────────────── -->
+    <section id="rest-fundamentals" class="lesson-section">
+      <div class="section-eyebrow">Lesson 0</div>
+      <h2 class="section-title">REST Fundamentals</h2>
+      <p class="section-subtitle">Understand the HTTP methods (GET, POST, PUT, PATCH, DELETE) that power every REST API — including Claude's.</p>
+
+      <div class="objectives">
+        <div class="objectives-title">Learning Objectives</div>
+        <div class="objective-item"><span class="obj-check">✓</span>Understand the 5 main HTTP methods and when to use each one</div>
+        <div class="objective-item"><span class="obj-check">✓</span>Learn the relationship between HTTP methods and CRUD operations</div>
+        <div class="objective-item"><span class="obj-check">✓</span>See live examples of GET, POST, PUT, PATCH, DELETE requests</div>
+        <div class="objective-item"><span class="obj-check">✓</span>Understand HTTP status codes and response patterns</div>
+      </div>
+
+      <h3>What is REST?</h3>
+      <p><strong>REST (Representational State Transfer)</strong> is an architectural style for designing web APIs. REST APIs use standard HTTP methods to perform operations on <strong>resources</strong> (data objects identified by URLs).</p>
+
+      <h3>HTTP Methods — The CRUD Operations</h3>
+      <p>Every REST API uses these HTTP methods to Create, Read, Update, and Delete resources:</p>
+
+      <table class="error-table">
+        <thead><tr><th>Method</th><th>CRUD</th><th>Purpose</th><th>Example</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code style="color:#a6e3a1;font-weight:bold">GET</code></td>
+            <td>Read</td>
+            <td>Retrieve data (no changes)</td>
+            <td><code>GET /users/42</code> → fetch user #42</td>
+          </tr>
+          <tr>
+            <td><code style="color:#89b4fa;font-weight:bold">POST</code></td>
+            <td>Create</td>
+            <td>Create a new resource</td>
+            <td><code>POST /users</code> + body → create new user</td>
+          </tr>
+          <tr>
+            <td><code style="color:#fab387;font-weight:bold">PUT</code></td>
+            <td>Update</td>
+            <td>Replace entire resource</td>
+            <td><code>PUT /users/42</code> + body → replace user #42</td>
+          </tr>
+          <tr>
+            <td><code style="color:#f9e2af;font-weight:bold">PATCH</code></td>
+            <td>Update</td>
+            <td>Partially update resource</td>
+            <td><code>PATCH /users/42</code> + partial body → update fields</td>
+          </tr>
+          <tr>
+            <td><code style="color:#f38ba8;font-weight:bold">DELETE</code></td>
+            <td>Delete</td>
+            <td>Remove a resource</td>
+            <td><code>DELETE /users/42</code> → delete user #42</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Live Examples</h3>
+      <p>These demos use <strong>JSONPlaceholder</strong>, a free public REST API for testing. No API key needed!</p>
+
+      <div class="callout info">
+        <span class="callout-icon">🌐</span>
+        <div class="callout-body">
+          <strong>Try it yourself!</strong>
+          Click any button below to make a real HTTP request to <code>jsonplaceholder.typicode.com</code>. Watch the request and response in real-time.
+        </div>
+      </div>
+
+      <div class="demo-box">
+        <div class="demo-header"><span class="demo-icon">🟢</span>GET — Read Data</div>
+        <p>Retrieves data without modifying anything. Safe to call multiple times (idempotent).</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+          <button class="demo-btn" onclick="restDemo('GET', '/posts/1', null, 'rest-get-output')">GET /posts/1</button>
+          <button class="demo-btn" onclick="restDemo('GET', '/posts?_limit=3', null, 'rest-get-output')">GET /posts?_limit=3</button>
+          <button class="demo-btn" onclick="restDemo('GET', '/posts/1/comments', null, 'rest-get-output')">GET /posts/1/comments</button>
+        </div>
+        <div class="demo-output" id="rest-get-output">Click a button above to see the response...</div>
+      </div>
+
+      <div class="demo-box">
+        <div class="demo-header"><span class="demo-icon">🔵</span>POST — Create Data</div>
+        <p>Creates a new resource. The server assigns an ID and returns the created object.</p>
+        <button class="demo-btn" onclick="restDemo('POST', '/posts', {title:'My New Post',body:'Hello from the tutorial!',userId:1}, 'rest-post-output')">POST /posts</button>
+        <div class="demo-output" id="rest-post-output">Click the button to create a new post...</div>
+      </div>
+
+      <div class="demo-box">
+        <div class="demo-header"><span class="demo-icon">🟠</span>PUT — Replace Data</div>
+        <p>Replaces the <strong>entire</strong> resource. You must send all fields, not just the ones you want to change.</p>
+        <button class="demo-btn" onclick="restDemo('PUT', '/posts/1', {id:1,title:'Updated Title',body:'Completely replaced body',userId:1}, 'rest-put-output')">PUT /posts/1</button>
+        <div class="demo-output" id="rest-put-output">Click the button to replace a post...</div>
+      </div>
+
+      <div class="demo-box">
+        <div class="demo-header"><span class="demo-icon">🟡</span>PATCH — Partial Update</div>
+        <p>Updates only the specified fields. Other fields remain unchanged. More efficient than PUT for small changes.</p>
+        <button class="demo-btn" onclick="restDemo('PATCH', '/posts/1', {title:'Only Title Changed'}, 'rest-patch-output')">PATCH /posts/1</button>
+        <div class="demo-output" id="rest-patch-output">Click the button to partially update a post...</div>
+      </div>
+
+      <div class="demo-box">
+        <div class="demo-header"><span class="demo-icon">🔴</span>DELETE — Remove Data</div>
+        <p>Removes a resource. Returns an empty object or confirmation on success.</p>
+        <button class="demo-btn" onclick="restDemo('DELETE', '/posts/1', null, 'rest-delete-output')">DELETE /posts/1</button>
+        <div class="demo-output" id="rest-delete-output">Click the button to delete a post...</div>
+      </div>
+
+      <h3>HTTP Status Codes</h3>
+      <p>The server responds with a status code to tell you what happened:</p>
+      <table class="error-table">
+        <thead><tr><th>Code Range</th><th>Meaning</th><th>Common Codes</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code style="color:#a6e3a1">2xx</code></td>
+            <td>Success</td>
+            <td><code>200</code> OK, <code>201</code> Created, <code>204</code> No Content</td>
+          </tr>
+          <tr>
+            <td><code style="color:#f9e2af">3xx</code></td>
+            <td>Redirect</td>
+            <td><code>301</code> Moved Permanently, <code>304</code> Not Modified</td>
+          </tr>
+          <tr>
+            <td><code style="color:#fab387">4xx</code></td>
+            <td>Client Error</td>
+            <td><code>400</code> Bad Request, <code>401</code> Unauthorized, <code>404</code> Not Found, <code>429</code> Too Many Requests</td>
+          </tr>
+          <tr>
+            <td><code style="color:#f38ba8">5xx</code></td>
+            <td>Server Error</td>
+            <td><code>500</code> Internal Error, <code>502</code> Bad Gateway, <code>503</code> Service Unavailable</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>How Claude's API Uses REST</h3>
+      <p>The Claude API is a REST API, but it only uses <strong>one HTTP method: POST</strong>. All interactions go through:</p>
+      <div class="code-block">
+        <div class="code-header"><span class="code-label">Claude API Endpoint</span></div>
+        <div class="code-panel active" data-lang="bash">
+<pre><code class="language-bash">POST https://api.anthropic.com/v1/messages
+
+# Headers:
+#   x-api-key: sk-ant-your-key-here
+#   anthropic-version: 2023-06-01
+#   content-type: application/json
+
+# Body: { "model": "...", "max_tokens": N, "messages": [...] }</code></pre></div>
+      </div>
+      <p>Why only POST? Because every request to Claude <strong>creates</strong> a new message completion — it's always a "create" operation, not reading, updating, or deleting data.</p>
+
+      <div class="takeaways">
+        <div class="takeaways-title">Key Takeaways</div>
+        <ul>
+          <li><strong>GET</strong> = Read (no side effects, safe to repeat)</li>
+          <li><strong>POST</strong> = Create (new resource, not idempotent)</li>
+          <li><strong>PUT</strong> = Replace entire resource (idempotent)</li>
+          <li><strong>PATCH</strong> = Partial update (only changed fields)</li>
+          <li><strong>DELETE</strong> = Remove resource</li>
+          <li>Status codes tell you success (2xx), client error (4xx), or server error (5xx)</li>
+          <li>Claude's API uses <code>POST /v1/messages</code> because every call creates a new completion</li>
+        </ul>
+      </div>
     </section>
 
     <!-- ─────────────────────────────────────────────────────────────── -->
@@ -1286,6 +1461,387 @@ async function callClaude(message, retries = 3) {
     </section>
 
     <!-- ─────────────────────────────────────────────────────────────── -->
+    <!-- LESSON 8: AUTODESK ACC BUILD                                     -->
+    <!-- ─────────────────────────────────────────────────────────────── -->
+    <section id="autodesk-acc" class="lesson-section">
+      <div class="section-eyebrow">Lesson 8</div>
+      <h2 class="section-title">Autodesk ACC Build API 🏗️</h2>
+      <p class="section-subtitle">Authenticate with Autodesk's two-legged OAuth and interact with ACC Build — projects, issues, and RFIs.</p>
+
+      <div class="objectives">
+        <div class="objectives-title">Learning Objectives</div>
+        <div class="objective-item"><span class="obj-check">✓</span>Understand two-legged OAuth 2.0 (client credentials flow)</div>
+        <div class="objective-item"><span class="obj-check">✓</span>Get an access token from Autodesk Platform Services</div>
+        <div class="objective-item"><span class="obj-check">✓</span>List ACC Build projects, issues, and RFIs via API</div>
+        <div class="objective-item"><span class="obj-check">✓</span>Create issues programmatically</div>
+      </div>
+
+      <h3>What is Two-Legged OAuth?</h3>
+      <p><strong>Two-legged OAuth</strong> (also called "client credentials" flow) is for <strong>server-to-server</strong> communication. No user login is needed — your application authenticates directly with its own credentials.</p>
+      <p>This is different from <strong>three-legged OAuth</strong> (used by Google, GitHub, etc.) where a user grants your app permission via a browser redirect.</p>
+
+      <div class="diagram">  Your Server
+       │
+       │  POST /authentication/v2/token
+       │  Authorization: Basic base64(client_id:client_secret)
+       │  Body: grant_type=client_credentials&scope=data:read data:write
+       │
+       ▼
+┌───────────────────────────┐
+│  Autodesk Auth Server     │  ←── Validates credentials, returns token
+└───────────────────────────┘
+       │
+       │  { "access_token": "eyJ...", "expires_in": 3600, "token_type": "Bearer" }
+       │
+       ▼
+  Your Server
+  (use token for all ACC API calls)
+       │
+       │  GET /construction/admin/v1/projects
+       │  Authorization: Bearer eyJ...
+       │
+       ▼
+┌───────────────────────────┐
+│  ACC Build API            │  ←── Returns projects, issues, RFIs
+└───────────────────────────┘</div>
+
+      <h3>Setup</h3>
+      <div class="callout info">
+        <span class="callout-icon">🔑</span>
+        <div class="callout-body">
+          <strong>Get Your Credentials</strong>
+          <ol style="margin:8px 0 0 0;padding-left:20px">
+            <li>Go to <strong>aps.autodesk.com/myapps</strong></li>
+            <li>Create or select an application</li>
+            <li>Copy the <strong>Client ID</strong> and <strong>Client Secret</strong></li>
+            <li>Add them to your <code>.env</code> file or enter them below</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="demo-box">
+        <div class="demo-header"><span class="demo-icon">🔑</span>APS Credentials</div>
+        <div class="form-row">
+          <label class="form-label">Client ID</label>
+          <input id="apsClientId" type="text" placeholder="Your APS Client ID">
+        </div>
+        <div class="form-row">
+          <label class="form-label">Client Secret</label>
+          <input id="apsClientSecret" type="password" placeholder="Your APS Client Secret">
+        </div>
+        <button class="demo-btn" onclick="saveApsCredentials()" style="margin-top:8px">Save Credentials</button>
+        <div id="apsCredStatus" style="margin-top:8px;font-size:13px;color:var(--muted)">Enter your APS credentials above</div>
+      </div>
+
+      <h3>Interactive Demos</h3>
+
+      <div class="demo-box">
+        <div class="demo-header"><span class="demo-icon">🔐</span>Demo 1: Get Access Token</div>
+        <p>Authenticate with Autodesk using two-legged OAuth to get a Bearer token.</p>
+        <div class="demo-controls">
+          <button id="accTokenBtn" class="btn-run" onclick="runAccAuth()">
+            <span class="btn-text">▶ Get Token</span>
+            <span class="spinner"></span>
+          </button>
+        </div>
+        <div id="accTokenOutput" class="output-area">
+          <div class="output-header"><span>Token Response</span></div>
+          <div id="accTokenResult" class="output-box"></div>
+        </div>
+      </div>
+
+      <div class="demo-box">
+        <div class="demo-header"><span class="demo-icon">📂</span>Demo 2: List Projects</div>
+        <p>Fetch all ACC Build projects your app has access to.</p>
+        <div class="demo-controls">
+          <button id="accProjectsBtn" class="btn-run" onclick="runAccProjects()">
+            <span class="btn-text">▶ List Projects</span>
+            <span class="spinner"></span>
+          </button>
+        </div>
+        <div id="accProjectsOutput" class="output-area">
+          <div class="output-header"><span>Projects</span></div>
+          <div id="accProjectsResult" class="output-box"></div>
+        </div>
+      </div>
+
+      <div class="demo-box">
+        <div class="demo-header"><span class="demo-icon">📋</span>Demo 3: List Issues</div>
+        <p>Fetch issues from the first project. Requires a valid token and at least one project.</p>
+        <div class="demo-controls">
+          <button id="accIssuesBtn" class="btn-run" onclick="runAccIssues()">
+            <span class="btn-text">▶ List Issues</span>
+            <span class="spinner"></span>
+          </button>
+        </div>
+        <div id="accIssuesOutput" class="output-area">
+          <div class="output-header"><span>Issues</span></div>
+          <div id="accIssuesResult" class="output-box"></div>
+        </div>
+      </div>
+
+      <div class="demo-box">
+        <div class="demo-header"><span class="demo-icon">➕</span>Demo 4: Create Issue</div>
+        <p>Create a test issue in the first project.</p>
+        <div class="form-row">
+          <label class="form-label">Issue Title</label>
+          <input id="accIssueTitle" type="text" value="Tutorial Test Issue — Safe to Delete" placeholder="Issue title">
+        </div>
+        <div class="demo-controls">
+          <button id="accCreateBtn" class="btn-run" onclick="runAccCreateIssue()">
+            <span class="btn-text">▶ Create Issue</span>
+            <span class="spinner"></span>
+          </button>
+        </div>
+        <div id="accCreateOutput" class="output-area">
+          <div class="output-header"><span>Created Issue</span></div>
+          <div id="accCreateResult" class="output-box"></div>
+        </div>
+      </div>
+
+      <h3>Submittals</h3>
+      <p>Submittals are formal document submissions for review and approval. The workflow follows: <strong>draft</strong> → <strong>submitted</strong> → <strong>reviewed</strong> → <strong>approved/rejected</strong>.</p>
+
+      <div class="demo-box">
+        <div class="demo-header"><span class="demo-icon">📝</span>Demo 5: Submittals Workflow</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+          <button id="accSubmittalsBtn" class="demo-btn" onclick="runAccSubmittals()">List Submittals</button>
+          <button id="accCreateSubmittalBtn" class="demo-btn" onclick="runAccCreateSubmittal()">Create + Submit for Review</button>
+        </div>
+        <div id="accSubmittalsOutput" class="output-area">
+          <div class="output-header"><span>Submittals Result</span></div>
+          <div id="accSubmittalsResult" class="output-box"></div>
+        </div>
+      </div>
+
+      <h3>Assets</h3>
+      <p>Assets track physical equipment, materials, and components. The API uses <strong>batch operations</strong> for efficiency.</p>
+
+      <div class="demo-box">
+        <div class="demo-header"><span class="demo-icon">📦</span>Demo 6: Assets — Full CRUD</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+          <button class="demo-btn" onclick="runAccAssetCategories()">List Categories</button>
+          <button class="demo-btn" onclick="runAccListAssets()">List Assets</button>
+        </div>
+        <div class="form-row">
+          <label class="form-label">Asset Name</label>
+          <input id="accAssetName" type="text" value="Tutorial Test Asset" placeholder="Asset display name">
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+          <button class="demo-btn" onclick="runAccCreateAsset()">Create Asset</button>
+          <button class="demo-btn" onclick="runAccUpdateAsset()">Update Asset</button>
+          <button class="demo-btn" onclick="runAccDeleteAsset()">Delete Asset</button>
+        </div>
+        <div id="accAssetsOutput" class="output-area">
+          <div class="output-header"><span>Assets Result</span></div>
+          <div id="accAssetsResult" class="output-box"></div>
+        </div>
+      </div>
+
+      <h3>Assets with Revit</h3>
+      <p>Extract element data from Revit (.rvt) models using the <strong>Model Derivative API</strong>, then link elements to ACC assets via custom attributes.</p>
+
+      <div class="demo-box">
+        <div class="demo-header"><span class="demo-icon">🏛️</span>Demo 7: Revit → ACC Asset Pipeline</div>
+        <div class="diagram" style="font-size:13px;margin-bottom:16px">  Upload .rvt → POST /designdata/job → Poll manifest → GET metadata
+  → GET /metadata/{guid}/properties → Extract externalId + properties
+  → Create ACC asset with revitElementId custom attribute</div>
+        <div class="form-row">
+          <label class="form-label">Model URN (base64)</label>
+          <input id="accRevitUrn" type="text" placeholder="Paste base64-encoded URN of a translated Revit file">
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+          <button class="demo-btn" onclick="runAccRevitManifest()">Check Translation Status</button>
+          <button class="demo-btn" onclick="runAccRevitProperties()">Extract Properties</button>
+          <button class="demo-btn" onclick="runAccRevitLinkAsset()">Create Linked Asset</button>
+        </div>
+        <div id="accRevitOutput" class="output-area">
+          <div class="output-header"><span>Revit Result</span></div>
+          <div id="accRevitResult" class="output-box"></div>
+        </div>
+      </div>
+
+      <h3>Code Examples</h3>
+      <div class="code-block">
+        <div class="code-tabs">
+          <button class="code-tab active" data-lang="python">Python</button>
+          <button class="code-tab" data-lang="javascript">Node.js</button>
+          <button class="code-tab" data-lang="bash">cURL</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+<pre><code class="language-python">import base64, urllib.request, urllib.parse, json
+
+client_id = "YOUR_CLIENT_ID"
+client_secret = "YOUR_CLIENT_SECRET"
+
+# Step 1: Get access token
+b64 = base64.b64encode(f"{client_id}:{client_secret}".encode()).decode()
+body = urllib.parse.urlencode({
+    "grant_type": "client_credentials",
+    "scope": "data:read data:write account:read"
+}).encode()
+
+req = urllib.request.Request(
+    "https://developer.api.autodesk.com/authentication/v2/token",
+    data=body,
+    headers={
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Authorization": f"Basic {b64}"
+    }
+)
+with urllib.request.urlopen(req) as resp:
+    token = json.loads(resp.read())["access_token"]
+
+# Step 2: Use token to list projects
+req = urllib.request.Request(
+    "https://developer.api.autodesk.com/construction/admin/v1/projects",
+    headers={"Authorization": f"Bearer {token}"}
+)
+with urllib.request.urlopen(req) as resp:
+    projects = json.loads(resp.read())
+    print(projects["results"])</code></pre></div>
+        <div class="code-panel" data-lang="javascript">
+<pre><code class="language-javascript">// Step 1: Get access token
+const b64 = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+
+const tokenResp = await fetch(
+  'https://developer.api.autodesk.com/authentication/v2/token',
+  {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Authorization': `Basic ${b64}`
+    },
+    body: 'grant_type=client_credentials&scope=data:read%20data:write'
+  }
+);
+const { access_token } = await tokenResp.json();
+
+// Step 2: Use token to list projects
+const projResp = await fetch(
+  'https://developer.api.autodesk.com/construction/admin/v1/projects',
+  { headers: { 'Authorization': `Bearer ${access_token}` } }
+);
+const projects = await projResp.json();
+console.log(projects.results);</code></pre></div>
+        <div class="code-panel" data-lang="bash">
+<pre><code class="language-bash"># Step 1: Get access token
+TOKEN=$(curl -s -X POST \
+  https://developer.api.autodesk.com/authentication/v2/token \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -H "Authorization: Basic $(echo -n $CLIENT_ID:$CLIENT_SECRET | base64)" \
+  -d "grant_type=client_credentials&scope=data:read%20data:write" \
+  | jq -r '.access_token')
+
+# Step 2: List projects
+curl -s \
+  https://developer.api.autodesk.com/construction/admin/v1/projects \
+  -H "Authorization: Bearer $TOKEN" | jq '.results'
+
+# Step 3: List issues for a project
+curl -s \
+  "https://developer.api.autodesk.com/construction/issues/v1/projects/$PROJECT_ID/issues" \
+  -H "Authorization: Bearer $TOKEN" | jq '.results'</code></pre></div>
+      </div>
+
+      <h3>ACC Build API Endpoints</h3>
+      <table class="error-table">
+        <thead><tr><th>Method</th><th>Endpoint</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code style="color:#89b4fa">POST</code></td>
+            <td><code>/authentication/v2/token</code></td>
+            <td>Get OAuth access token</td>
+          </tr>
+          <tr>
+            <td><code style="color:#a6e3a1">GET</code></td>
+            <td><code>/construction/admin/v1/projects</code></td>
+            <td>List all projects</td>
+          </tr>
+          <tr>
+            <td><code style="color:#a6e3a1">GET</code></td>
+            <td><code>/construction/issues/v1/projects/{id}/issues</code></td>
+            <td>List project issues</td>
+          </tr>
+          <tr>
+            <td><code style="color:#89b4fa">POST</code></td>
+            <td><code>/construction/issues/v1/projects/{id}/issues</code></td>
+            <td>Create a new issue</td>
+          </tr>
+          <tr>
+            <td><code style="color:#a6e3a1">GET</code></td>
+            <td><code>/construction/rfis/v2/projects/{id}/rfis</code></td>
+            <td>List project RFIs</td>
+          </tr>
+          <tr>
+            <td><code style="color:#89b4fa">POST</code></td>
+            <td><code>/construction/rfis/v2/projects/{id}/rfis</code></td>
+            <td>Create a new RFI</td>
+          </tr>
+          <tr>
+            <td><code style="color:#a6e3a1">GET</code></td>
+            <td><code>/construction/submittals/v2/projects/{id}/items</code></td>
+            <td>List submittals</td>
+          </tr>
+          <tr>
+            <td><code style="color:#89b4fa">POST</code></td>
+            <td><code>/construction/submittals/v2/.../items</code></td>
+            <td>Create submittal</td>
+          </tr>
+          <tr>
+            <td><code style="color:#89b4fa">POST</code></td>
+            <td><code>/.../items/{itemId}:transition</code></td>
+            <td>Submit for review (state transition)</td>
+          </tr>
+          <tr>
+            <td><code style="color:#89b4fa">POST</code></td>
+            <td><code>/.../assets/v2/.../assets:search</code></td>
+            <td>List/search assets</td>
+          </tr>
+          <tr>
+            <td><code style="color:#89b4fa">POST</code></td>
+            <td><code>/.../assets:batch-create</code></td>
+            <td>Create assets (batch)</td>
+          </tr>
+          <tr>
+            <td><code style="color:#f9e2af">PATCH</code></td>
+            <td><code>/.../assets:batch-patch</code></td>
+            <td>Update assets (batch)</td>
+          </tr>
+          <tr>
+            <td><code style="color:#f38ba8">POST</code></td>
+            <td><code>/.../assets:batch-delete</code></td>
+            <td>Delete assets (batch)</td>
+          </tr>
+          <tr>
+            <td><code style="color:#89b4fa">POST</code></td>
+            <td><code>/modelderivative/v2/designdata/job</code></td>
+            <td>Submit Revit translation job</td>
+          </tr>
+          <tr>
+            <td><code style="color:#a6e3a1">GET</code></td>
+            <td><code>/.../designdata/{urn}/metadata/{guid}/properties</code></td>
+            <td>Extract Revit element properties</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="takeaways">
+        <div class="takeaways-title">Key Takeaways</div>
+        <ul>
+          <li><strong>Two-legged OAuth</strong> = server-to-server, no user login needed</li>
+          <li>Auth uses <code>Basic</code> header with base64-encoded <code>client_id:client_secret</code></li>
+          <li>Token expires in <strong>1 hour</strong> (3600s) — cache and refresh before expiry</li>
+          <li>All API calls use <code>Authorization: Bearer &lt;token&gt;</code> header</li>
+          <li><strong>Submittals</strong>: draft → submitted → reviewed → approved/rejected</li>
+          <li><strong>Assets</strong> use batch operations: <code>batch-create</code>, <code>batch-patch</code>, <code>batch-delete</code></li>
+          <li><strong>Revit integration</strong>: Model Derivative API → extract externalId → link to assets via custom attributes</li>
+          <li>Scripts: <code>python_tutorial/08_autodesk_acc.py</code> and <code>node_tutorial/08_autodesk_acc.js</code></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ─────────────────────────────────────────────────────────────── -->
     <!-- PRACTICE ZONE                                                    -->
     <!-- ─────────────────────────────────────────────────────────────── -->
     <section id="practice" class="lesson-section">
@@ -1381,6 +1937,179 @@ async function callClaude(message, retries = 3) {
           <h4>Exercise 4: Token Count</h4>
           <p>Set max_tokens to 50 and ask a long question. Notice how <code>stop_reason: "max_tokens"</code> truncates the response.</p>
         </div>
+      </div>
+    </section>
+
+    <!-- ─────────────────────────────────────────────────────────────── -->
+    <!-- PYTHON TUTORIAL SCRIPTS                                          -->
+    <!-- ─────────────────────────────────────────────────────────────── -->
+    <section id="python-tutorial" class="lesson-section">
+      <div class="section-eyebrow">Python Edition</div>
+      <h2 class="section-title">Python Tutorial Scripts 🐍</h2>
+      <p class="section-subtitle">Prefer learning from your terminal? Run standalone Python scripts that teach each concept step-by-step with live output.</p>
+
+      <div class="callout info">
+        <span class="callout-icon">📂</span>
+        <div class="callout-body">
+          <strong>Location</strong>
+          All Python scripts are in the <code>python_tutorial/</code> folder. Each script is self-contained — run them individually or use the interactive menu.
+        </div>
+      </div>
+
+      <h3>Quick Start</h3>
+      <div class="code-block">
+        <div class="code-header"><span class="code-label">Terminal setup</span><button class="copy-btn">Copy</button></div>
+        <div class="code-panel active" data-lang="bash">
+<pre><code class="language-bash"># 1. Install Python dependencies
+cd python_tutorial
+pip install -r requirements.txt
+
+# 2. Set your API key (pick one method)
+export ANTHROPIC_API_KEY="sk-ant-your-key-here"   # Unix/Mac
+# OR create a ../.env file with ANTHROPIC_API_KEY=sk-ant-...
+
+# 3. Verify setup
+python setup_check.py
+
+# 4. Run the interactive tutorial menu
+python run_tutorial.py
+
+# OR run individual lessons directly
+python 01_basic_message.py
+python 02_system_prompts.py
+</code></pre></div>
+      </div>
+
+      <h3>Available Scripts</h3>
+      <table class="error-table">
+        <thead><tr><th>Script</th><th>Topic</th><th>What You'll Learn</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>setup_check.py</code></td>
+            <td>Setup Verification</td>
+            <td>Checks Python version, SDK, API key, and connectivity</td>
+          </tr>
+          <tr>
+            <td><code>00_rest_fundamentals.py</code></td>
+            <td>REST Fundamentals</td>
+            <td>GET, POST, PUT, PATCH, DELETE with live JSONPlaceholder API (no API key needed)</td>
+          </tr>
+          <tr>
+            <td><code>01_basic_message.py</code></td>
+            <td>First API Call</td>
+            <td>Create client, send message, read response, inspect metadata + tokens</td>
+          </tr>
+          <tr>
+            <td><code>02_system_prompts.py</code></td>
+            <td>System Prompts</td>
+            <td>4 examples: default, pirate persona, JSON mode, simple teacher</td>
+          </tr>
+          <tr>
+            <td><code>03_conversations.py</code></td>
+            <td>Multi-Turn Chat</td>
+            <td>Stateless demo, Conversation class, interactive chatbot loop</td>
+          </tr>
+          <tr>
+            <td><code>04_streaming.py</code></td>
+            <td>Streaming</td>
+            <td>text_stream, raw events, event log, streaming chat</td>
+          </tr>
+          <tr>
+            <td><code>05_tool_use.py</code></td>
+            <td>Tool Use</td>
+            <td>3 tools (weather, calc, dictionary), full agentic loop with logging</td>
+          </tr>
+          <tr>
+            <td><code>06_error_handling.py</code></td>
+            <td>Error Handling</td>
+            <td>Simulated errors, retry with backoff, input validation, SDK config</td>
+          </tr>
+          <tr>
+            <td><code>07_advanced.py</code></td>
+            <td>Advanced Features</td>
+            <td>Extended thinking, structured outputs (Pydantic), prompt caching, token counting</td>
+          </tr>
+          <tr>
+            <td><code>08_autodesk_acc.py</code></td>
+            <td>Autodesk ACC Build</td>
+            <td>Two-legged OAuth, list projects, issues, RFIs, create issues</td>
+          </tr>
+          <tr>
+            <td><code>run_tutorial.py</code></td>
+            <td>Menu Runner</td>
+            <td>Interactive menu to pick and run any lesson</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>What Each Script Includes</h3>
+      <div class="concept-grid">
+        <div class="concept-card">
+          <h4>📖 Concept Explanations</h4>
+          <p>Each script has printed explanations that teach the concept before running the code.</p>
+        </div>
+        <div class="concept-card">
+          <h4>▶️ Live Demos</h4>
+          <p>Real API calls with printed results — see requests and responses in your terminal.</p>
+        </div>
+        <div class="concept-card">
+          <h4>🎯 Practice Exercises</h4>
+          <p>Every script ends with suggested modifications for you to try and learn by doing.</p>
+        </div>
+        <div class="concept-card">
+          <h4>💬 Interactive Modes</h4>
+          <p>Lessons 3 and 4 include interactive chat modes where you type messages live.</p>
+        </div>
+      </div>
+
+      <h3>Example Output</h3>
+      <div class="code-block">
+        <div class="code-header"><span class="code-label">$ python 01_basic_message.py</span></div>
+        <div class="code-panel active" data-lang="bash">
+<pre><code class="language-bash">📡 LESSON 1: Your First API Call
+────────────────────────────────────────
+
+➤ Sending message to Claude...
+  Prompt: "What are 3 fun facts about octopuses?"
+
+✅ Response received!
+
+━━━ Claude's Reply ━━━
+1. Octopuses have three hearts — two pump blood to the gills,
+   and one pumps it to the rest of the body.
+2. They have blue blood because they use copper-based hemocyanin.
+3. They can change color and texture in milliseconds for camouflage.
+━━━━━━━━━━━━━━━━━━━━━
+
+📊 Response Metadata:
+  Message ID:    msg_01XFDUDYJgAACzvnptvVoYEL
+  Model used:    claude-haiku-4-5-20251001
+  Stop reason:   end_turn
+  Input tokens:  15
+  Output tokens: 89
+  Approx cost:   $0.000460
+
+💡 Key Concepts:
+  • response.content[0].text  → Claude's reply text
+  • response.stop_reason      → "end_turn" = finished
+  • response.usage            → token counts (determines cost)
+
+🎯 YOUR TURN — Try modifying this script:
+  1. Change the prompt to ask something else
+  2. Try model='claude-sonnet-4-6' for smarter responses
+  3. Set max_tokens=50 and see what stop_reason you get
+</code></pre></div>
+      </div>
+
+      <div class="takeaways">
+        <div class="takeaways-title">✅ Python Tutorial Tips</div>
+        <ul>
+          <li>Run <code>python setup_check.py</code> first to verify everything works</li>
+          <li>Scripts use <code>claude-haiku-4-5</code> by default — cheapest and fastest for learning</li>
+          <li>Each script is independent — skip around based on what you want to learn</li>
+          <li>Read the code comments — they explain every line and design decision</li>
+          <li>Every script ends with exercises — modify the code and experiment!</li>
+        </ul>
       </div>
     </section>
 

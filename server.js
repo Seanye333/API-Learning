@@ -338,6 +338,108 @@ app.post('/api/practice', async (req, res) => {
   }
 });
 
+// ─── Lesson 8: Autodesk ACC Build (proxy to avoid CORS) ───────────────────────
+
+// Helper: get APS credentials from request headers or env
+function getApsCredentials(req) {
+  return {
+    clientId: req.headers['x-aps-client-id'] || process.env.APS_CLIENT_ID || '',
+    clientSecret: req.headers['x-aps-client-secret'] || process.env.APS_CLIENT_SECRET || ''
+  };
+}
+
+// ACC: Get two-legged OAuth token
+app.post('/api/acc/token', async (req, res) => {
+  try {
+    const { clientId, clientSecret } = getApsCredentials(req);
+    if (!clientId || !clientSecret) {
+      return res.status(400).json({ success: false, error: { message: 'APS_CLIENT_ID and APS_CLIENT_SECRET are required. Set them in .env or pass via headers.' } });
+    }
+
+    const b64 = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+    const scopes = req.body.scopes || 'data:read data:write data:create account:read';
+
+    const response = await fetch('https://developer.api.autodesk.com/authentication/v2/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': `Basic ${b64}`
+      },
+      body: `grant_type=client_credentials&scope=${encodeURIComponent(scopes)}`
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      res.json({ success: true, ...data });
+    } else {
+      res.status(response.status).json({ success: false, error: data });
+    }
+  } catch (err) {
+    res.status(500).json({ success: false, error: { message: err.message } });
+  }
+});
+
+// ACC: Proxy GET requests to Autodesk API
+app.get('/api/acc/proxy/*', async (req, res) => {
+  try {
+    const token = req.headers['authorization'];
+    if (!token) return res.status(401).json({ success: false, error: { message: 'Authorization header with Bearer token is required.' } });
+
+    const path = req.params[0]; // everything after /api/acc/proxy/
+    const url = `https://developer.api.autodesk.com/${path}${req._parsedUrl.search || ''}`;
+
+    const response = await fetch(url, {
+      headers: { 'Authorization': token, 'Content-Type': 'application/json' }
+    });
+    const data = await response.text();
+    res.status(response.status).type('json').send(data);
+  } catch (err) {
+    res.status(500).json({ success: false, error: { message: err.message } });
+  }
+});
+
+// ACC: Proxy POST requests to Autodesk API
+app.post('/api/acc/proxy/*', async (req, res) => {
+  try {
+    const token = req.headers['authorization'];
+    if (!token) return res.status(401).json({ success: false, error: { message: 'Authorization header with Bearer token is required.' } });
+
+    const path = req.params[0];
+    const url = `https://developer.api.autodesk.com/${path}`;
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Authorization': token, 'Content-Type': 'application/json' },
+      body: JSON.stringify(req.body)
+    });
+    const data = await response.text();
+    res.status(response.status).type('json').send(data);
+  } catch (err) {
+    res.status(500).json({ success: false, error: { message: err.message } });
+  }
+});
+
+// ACC: Proxy PATCH requests to Autodesk API (for asset batch-patch)
+app.patch('/api/acc/proxy/*', async (req, res) => {
+  try {
+    const token = req.headers['authorization'];
+    if (!token) return res.status(401).json({ success: false, error: { message: 'Authorization header with Bearer token is required.' } });
+
+    const path = req.params[0];
+    const url = `https://developer.api.autodesk.com/${path}`;
+
+    const response = await fetch(url, {
+      method: 'PATCH',
+      headers: { 'Authorization': token, 'Content-Type': 'application/json' },
+      body: JSON.stringify(req.body)
+    });
+    const data = await response.text();
+    res.status(response.status).type('json').send(data);
+  } catch (err) {
+    res.status(500).json({ success: false, error: { message: err.message } });
+  }
+});
+
 // ─── Start server ──────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

@@ -560,5 +560,550 @@ window.runPractice = async () => {
   setBtn('practiceBtn', false);
 };
 
+/* ── REST Fundamentals Demo ─────────────────────────────────────────────────── */
+window.restDemo = async (method, path, body, outputId) => {
+  const outputEl = document.getElementById(outputId);
+  if (!outputEl) return;
+  outputEl.innerHTML = `<span style="color:var(--muted)">Sending ${method} ${path}...</span>`;
+
+  const url = `https://jsonplaceholder.typicode.com${path}`;
+  const options = { method, headers: { 'Content-Type': 'application/json' } };
+  if (body) options.body = JSON.stringify(body);
+
+  try {
+    const start = performance.now();
+    const response = await fetch(url, options);
+    const elapsed = (performance.now() - start).toFixed(0);
+    const data = await response.json();
+
+    const methodColors = { GET: '#a6e3a1', POST: '#89b4fa', PUT: '#fab387', PATCH: '#f9e2af', DELETE: '#f38ba8' };
+    const color = methodColors[method] || '#cdd6f4';
+    const statusColor = response.status < 300 ? '#a6e3a1' : response.status < 400 ? '#f9e2af' : '#f38ba8';
+
+    let html = `<div style="margin-bottom:8px">`;
+    html += `<span style="color:${color};font-weight:bold">${method}</span> `;
+    html += `<span style="color:var(--subtext)">${url}</span>`;
+    html += `</div>`;
+
+    if (body) {
+      html += `<div style="margin-bottom:8px;font-size:12px;color:var(--muted)">Request Body:</div>`;
+      html += `<pre style="background:var(--mantle);padding:8px;border-radius:4px;margin-bottom:8px;font-size:12px;overflow-x:auto">${escHtml(JSON.stringify(body, null, 2))}</pre>`;
+    }
+
+    html += `<div style="margin-bottom:8px">`;
+    html += `<span style="color:${statusColor};font-weight:bold">${response.status} ${response.statusText}</span>`;
+    html += `<span style="color:var(--muted);margin-left:12px">${elapsed}ms</span>`;
+    html += `</div>`;
+
+    html += `<div style="font-size:12px;color:var(--muted);margin-bottom:4px">Response Body:</div>`;
+    const jsonStr = JSON.stringify(data, null, 2);
+    const truncated = jsonStr.length > 1500 ? jsonStr.slice(0, 1500) + '\n... (truncated)' : jsonStr;
+    html += `<pre style="background:var(--mantle);padding:8px;border-radius:4px;font-size:12px;overflow-x:auto;max-height:300px">${escHtml(truncated)}</pre>`;
+
+    outputEl.innerHTML = html;
+  } catch (err) {
+    outputEl.innerHTML = `<span style="color:var(--red)">Error: ${escHtml(err.message)}</span>`;
+  }
+};
+
+/* ── LESSON 8: Autodesk ACC Build Demos ─────────────────────────────────────── */
+let accToken = '';
+let accProjectId = '';
+
+// Save APS credentials to localStorage
+window.saveApsCredentials = () => {
+  const id = document.getElementById('apsClientId')?.value?.trim();
+  const secret = document.getElementById('apsClientSecret')?.value?.trim();
+  if (id) localStorage.setItem('aps_client_id', id);
+  if (secret) localStorage.setItem('aps_client_secret', secret);
+  const status = document.getElementById('apsCredStatus');
+  if (status) status.innerHTML = id && secret
+    ? '<span style="color:var(--green)">✓ Credentials saved</span>'
+    : '<span style="color:var(--yellow)">⚠ Enter both Client ID and Secret</span>';
+};
+
+// Load saved APS credentials on init
+document.addEventListener('DOMContentLoaded', () => {
+  const savedId = localStorage.getItem('aps_client_id');
+  const savedSecret = localStorage.getItem('aps_client_secret');
+  if (savedId) { const el = document.getElementById('apsClientId'); if (el) el.value = savedId; }
+  if (savedSecret) { const el = document.getElementById('apsClientSecret'); if (el) el.value = savedSecret; }
+  if (savedId && savedSecret) {
+    const status = document.getElementById('apsCredStatus');
+    if (status) status.innerHTML = '<span style="color:var(--green)">✓ Credentials loaded from storage</span>';
+  }
+});
+
+// Helper: get APS headers for proxy requests
+function getAccHeaders() {
+  const h = { 'Content-Type': 'application/json' };
+  const id = document.getElementById('apsClientId')?.value?.trim() || localStorage.getItem('aps_client_id') || '';
+  const secret = document.getElementById('apsClientSecret')?.value?.trim() || localStorage.getItem('aps_client_secret') || '';
+  if (id) h['x-aps-client-id'] = id;
+  if (secret) h['x-aps-client-secret'] = secret;
+  return h;
+}
+
+// Demo 1: Get OAuth token
+window.runAccAuth = async () => {
+  setBtn('accTokenBtn', true);
+  showOutput('accTokenOutput');
+  const box = document.getElementById('accTokenResult');
+  if (box) box.innerHTML = '<span style="color:var(--muted)">Authenticating...</span>';
+
+  try {
+    const resp = await fetch('/api/acc/token', { method: 'POST', headers: getAccHeaders(), body: JSON.stringify({}) });
+    const data = await resp.json();
+
+    if (data.success && data.access_token) {
+      accToken = data.access_token;
+      box.innerHTML = `
+        <div style="color:var(--green);font-weight:bold;margin-bottom:8px">✅ Token received!</div>
+        <div style="font-size:13px"><strong>Token:</strong> ${escHtml(accToken.substring(0, 50))}...</div>
+        <div style="font-size:13px"><strong>Expires in:</strong> ${data.expires_in}s (${Math.floor(data.expires_in / 60)} min)</div>
+        <div style="font-size:13px"><strong>Type:</strong> ${data.token_type || 'Bearer'}</div>
+      `;
+    } else {
+      box.innerHTML = `<div style="color:var(--red)">✗ Auth failed: ${escHtml(JSON.stringify(data.error || data))}</div>`;
+    }
+  } catch (err) {
+    box.innerHTML = `<div style="color:var(--red)">✗ Error: ${escHtml(err.message)}. Is the server running? (npm start)</div>`;
+  }
+  setBtn('accTokenBtn', false);
+};
+
+// Demo 2: List projects
+window.runAccProjects = async () => {
+  if (!accToken) return alert('Get a token first (Demo 1).');
+  setBtn('accProjectsBtn', true);
+  showOutput('accProjectsOutput');
+  const box = document.getElementById('accProjectsResult');
+  if (box) box.innerHTML = '<span style="color:var(--muted)">Fetching projects...</span>';
+
+  try {
+    const resp = await fetch('/api/acc/proxy/construction/admin/v1/projects', {
+      headers: { 'Authorization': `Bearer ${accToken}`, 'Content-Type': 'application/json' }
+    });
+    const data = await resp.json();
+
+    if (resp.ok && data.results) {
+      const results = data.results;
+      accProjectId = results[0]?.id || '';
+      let html = `<div style="color:var(--green);margin-bottom:8px">✅ Found ${data.pagination?.totalResults ?? results.length} project(s)</div>`;
+      results.slice(0, 8).forEach((p, i) => {
+        html += `<div style="padding:6px 0;border-bottom:1px solid var(--surface1)">
+          <strong>${i+1}. ${escHtml(p.name || 'Unnamed')}</strong>
+          <div style="font-size:12px;color:var(--muted)">ID: ${escHtml(p.id)} | Status: ${escHtml(p.status || 'N/A')}</div>
+        </div>`;
+      });
+      box.innerHTML = html;
+    } else {
+      box.innerHTML = `<div style="color:var(--red)">✗ Failed (${resp.status}): ${escHtml(JSON.stringify(data).substring(0, 300))}</div>`;
+    }
+  } catch (err) {
+    box.innerHTML = `<div style="color:var(--red)">✗ Error: ${escHtml(err.message)}</div>`;
+  }
+  setBtn('accProjectsBtn', false);
+};
+
+// Demo 3: List issues
+window.runAccIssues = async () => {
+  if (!accToken) return alert('Get a token first (Demo 1).');
+  if (!accProjectId) return alert('List projects first (Demo 2) to get a project ID.');
+  setBtn('accIssuesBtn', true);
+  showOutput('accIssuesOutput');
+  const box = document.getElementById('accIssuesResult');
+  if (box) box.innerHTML = '<span style="color:var(--muted)">Fetching issues...</span>';
+
+  try {
+    const resp = await fetch(`/api/acc/proxy/construction/issues/v1/projects/${accProjectId}/issues`, {
+      headers: { 'Authorization': `Bearer ${accToken}`, 'Content-Type': 'application/json' }
+    });
+    const data = await resp.json();
+
+    if (resp.ok && data.results) {
+      const results = data.results;
+      let html = `<div style="color:var(--green);margin-bottom:8px">✅ Found ${data.pagination?.totalResults ?? results.length} issue(s)</div>`;
+      if (results.length === 0) html += '<div style="color:var(--muted)">No issues found in this project.</div>';
+      results.slice(0, 10).forEach((iss, i) => {
+        html += `<div style="padding:6px 0;border-bottom:1px solid var(--surface1)">
+          <strong>${i+1}. ${escHtml(iss.title || 'Untitled')}</strong>
+          <div style="font-size:12px;color:var(--muted)">Status: ${escHtml(iss.status || 'N/A')} | Type: ${escHtml(iss.issueType || 'N/A')}</div>
+        </div>`;
+      });
+      box.innerHTML = html;
+    } else {
+      box.innerHTML = `<div style="color:var(--red)">✗ Failed (${resp.status}): ${escHtml(JSON.stringify(data).substring(0, 300))}</div>`;
+    }
+  } catch (err) {
+    box.innerHTML = `<div style="color:var(--red)">✗ Error: ${escHtml(err.message)}</div>`;
+  }
+  setBtn('accIssuesBtn', false);
+};
+
+// Demo 4: Create issue
+window.runAccCreateIssue = async () => {
+  if (!accToken) return alert('Get a token first (Demo 1).');
+  if (!accProjectId) return alert('List projects first (Demo 2) to get a project ID.');
+  const title = document.getElementById('accIssueTitle')?.value?.trim();
+  if (!title) return alert('Enter an issue title.');
+
+  setBtn('accCreateBtn', true);
+  showOutput('accCreateOutput');
+  const box = document.getElementById('accCreateResult');
+  if (box) box.innerHTML = '<span style="color:var(--muted)">Creating issue...</span>';
+
+  try {
+    const resp = await fetch(`/api/acc/proxy/construction/issues/v1/projects/${accProjectId}/issues`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${accToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, description: 'Created by API tutorial.', status: 'open' })
+    });
+    const data = await resp.json();
+
+    if (resp.ok) {
+      box.innerHTML = `
+        <div style="color:var(--green);font-weight:bold;margin-bottom:8px">✅ Issue created!</div>
+        <div style="font-size:13px"><strong>ID:</strong> ${escHtml(data.id || 'N/A')}</div>
+        <div style="font-size:13px"><strong>Title:</strong> ${escHtml(data.title || 'N/A')}</div>
+        <div style="font-size:13px"><strong>Status:</strong> ${escHtml(data.status || 'N/A')}</div>
+      `;
+    } else {
+      box.innerHTML = `<div style="color:var(--red)">✗ Failed (${resp.status}): ${escHtml(JSON.stringify(data).substring(0, 300))}</div>`;
+    }
+  } catch (err) {
+    box.innerHTML = `<div style="color:var(--red)">✗ Error: ${escHtml(err.message)}</div>`;
+  }
+  setBtn('accCreateBtn', false);
+};
+
+/* ── ACC: Submittals Demos ──────────────────────────────────────────────────── */
+
+window.runAccSubmittals = async () => {
+  if (!accToken) return alert('Get a token first (Demo 1).');
+  if (!accProjectId) return alert('List projects first (Demo 2).');
+  showOutput('accSubmittalsOutput');
+  const box = document.getElementById('accSubmittalsResult');
+  if (box) box.innerHTML = '<span style="color:var(--muted)">Fetching submittals...</span>';
+
+  try {
+    const resp = await fetch(`/api/acc/proxy/construction/submittals/v2/projects/${accProjectId}/items`, {
+      headers: { 'Authorization': `Bearer ${accToken}`, 'Content-Type': 'application/json' }
+    });
+    const data = await resp.json();
+    if (resp.ok && data.results) {
+      let html = `<div style="color:var(--green);margin-bottom:8px">✅ Found ${data.pagination?.totalResults ?? data.results.length} submittal(s)</div>`;
+      if (data.results.length === 0) html += '<div style="color:var(--muted)">No submittals found.</div>';
+      data.results.slice(0, 10).forEach((s, i) => {
+        html += `<div style="padding:4px 0;border-bottom:1px solid var(--surface1)">
+          <strong>${i+1}. ${escHtml(s.title || 'Untitled')}</strong>
+          <span style="font-size:12px;color:var(--muted)"> — ${escHtml(s.status || 'N/A')}</span>
+        </div>`;
+      });
+      box.innerHTML = html;
+    } else {
+      box.innerHTML = `<div style="color:var(--red)">✗ Failed (${resp.status}): ${escHtml(JSON.stringify(data).substring(0, 300))}</div>`;
+    }
+  } catch (err) {
+    box.innerHTML = `<div style="color:var(--red)">✗ Error: ${escHtml(err.message)}</div>`;
+  }
+};
+
+window.runAccCreateSubmittal = async () => {
+  if (!accToken) return alert('Get a token first (Demo 1).');
+  if (!accProjectId) return alert('List projects first (Demo 2).');
+  showOutput('accSubmittalsOutput');
+  const box = document.getElementById('accSubmittalsResult');
+  if (box) box.innerHTML = '<span style="color:var(--muted)">Creating submittal...</span>';
+
+  try {
+    // Step 1: Create draft
+    const createResp = await fetch(`/api/acc/proxy/construction/submittals/v2/projects/${accProjectId}/items`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${accToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: 'Tutorial Test Submittal', description: 'Created by tutorial.', status: 'draft' })
+    });
+    const createData = await createResp.json();
+
+    if (!createResp.ok) {
+      box.innerHTML = `<div style="color:var(--red)">✗ Create failed (${createResp.status}): ${escHtml(JSON.stringify(createData).substring(0, 300))}</div>`;
+      return;
+    }
+
+    let html = `<div style="color:var(--green);margin-bottom:8px">✅ Submittal created (draft)</div>
+      <div style="font-size:13px">ID: ${escHtml(createData.id || 'N/A')} | Status: ${escHtml(createData.status || 'draft')}</div>`;
+
+    // Step 2: Transition to submitted
+    if (createData.id) {
+      const transResp = await fetch(`/api/acc/proxy/construction/submittals/v2/projects/${accProjectId}/items/${createData.id}:transition`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${accToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ toState: 'submitted' })
+      });
+      if (transResp.ok) {
+        html += `<div style="color:var(--green);margin-top:8px">✅ Submitted for review!</div>`;
+      } else {
+        html += `<div style="color:var(--yellow);margin-top:8px">⚠ Created but transition failed (${transResp.status})</div>`;
+      }
+    }
+
+    box.innerHTML = html;
+  } catch (err) {
+    box.innerHTML = `<div style="color:var(--red)">✗ Error: ${escHtml(err.message)}</div>`;
+  }
+};
+
+/* ── ACC: Assets Demos ─────────────────────────────────────────────────────── */
+let accLastAssetId = '';
+let accCategoryId = '';
+
+window.runAccAssetCategories = async () => {
+  if (!accToken) return alert('Get a token first (Demo 1).');
+  if (!accProjectId) return alert('List projects first (Demo 2).');
+  showOutput('accAssetsOutput');
+  const box = document.getElementById('accAssetsResult');
+  if (box) box.innerHTML = '<span style="color:var(--muted)">Fetching categories...</span>';
+
+  try {
+    const resp = await fetch(`/api/acc/proxy/construction/assets/v2/projects/${accProjectId}/categories`, {
+      headers: { 'Authorization': `Bearer ${accToken}`, 'Content-Type': 'application/json' }
+    });
+    const data = await resp.json();
+    const cats = Array.isArray(data) ? data : (data.results || []);
+    if (resp.ok && cats.length > 0) {
+      accCategoryId = cats[0].id || '';
+      let html = `<div style="color:var(--green);margin-bottom:8px">✅ Found ${cats.length} categor(ies)</div>`;
+      cats.slice(0, 10).forEach((c, i) => {
+        html += `<div style="padding:3px 0;font-size:13px">${i+1}. ${escHtml(c.name || 'Unnamed')} <span style="color:var(--muted)">(${escHtml(c.id)})</span></div>`;
+      });
+      box.innerHTML = html;
+    } else {
+      box.innerHTML = `<div style="color:var(--yellow)">No categories found or failed (${resp.status})</div>`;
+    }
+  } catch (err) {
+    box.innerHTML = `<div style="color:var(--red)">✗ Error: ${escHtml(err.message)}</div>`;
+  }
+};
+
+window.runAccListAssets = async () => {
+  if (!accToken) return alert('Get a token first (Demo 1).');
+  if (!accProjectId) return alert('List projects first (Demo 2).');
+  showOutput('accAssetsOutput');
+  const box = document.getElementById('accAssetsResult');
+  if (box) box.innerHTML = '<span style="color:var(--muted)">Fetching assets...</span>';
+
+  try {
+    const resp = await fetch(`/api/acc/proxy/construction/assets/v2/projects/${accProjectId}/assets:search`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${accToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({})
+    });
+    const data = await resp.json();
+    if (resp.ok) {
+      const results = data.results || [];
+      let html = `<div style="color:var(--green);margin-bottom:8px">✅ Found ${results.length} asset(s)</div>`;
+      results.slice(0, 10).forEach((a, i) => {
+        html += `<div style="padding:4px 0;border-bottom:1px solid var(--surface1)">
+          <strong>${i+1}. ${escHtml(a.displayName || 'Unnamed')}</strong>
+          <div style="font-size:12px;color:var(--muted)">ID: ${escHtml(a.id)}</div>
+        </div>`;
+      });
+      box.innerHTML = html;
+    } else {
+      box.innerHTML = `<div style="color:var(--red)">✗ Failed (${resp.status})</div>`;
+    }
+  } catch (err) {
+    box.innerHTML = `<div style="color:var(--red)">✗ Error: ${escHtml(err.message)}</div>`;
+  }
+};
+
+window.runAccCreateAsset = async () => {
+  if (!accToken) return alert('Get a token first (Demo 1).');
+  if (!accProjectId) return alert('List projects first (Demo 2).');
+  const name = document.getElementById('accAssetName')?.value?.trim() || 'Tutorial Asset';
+  showOutput('accAssetsOutput');
+  const box = document.getElementById('accAssetsResult');
+  if (box) box.innerHTML = '<span style="color:var(--muted)">Creating asset...</span>';
+
+  try {
+    const item = { displayName: name, description: 'Created by API tutorial.' };
+    if (accCategoryId) item.categoryId = accCategoryId;
+    const resp = await fetch(`/api/acc/proxy/construction/assets/v2/projects/${accProjectId}/assets:batch-create`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${accToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items: [item] })
+    });
+    const data = await resp.json();
+    if (resp.ok) {
+      const results = data.results || (data.id ? [data] : []);
+      accLastAssetId = results[0]?.id || '';
+      box.innerHTML = `<div style="color:var(--green);font-weight:bold">✅ Asset created!</div>
+        <div style="font-size:13px">ID: ${escHtml(accLastAssetId)}</div>
+        <div style="font-size:13px">Name: ${escHtml(results[0]?.displayName || name)}</div>`;
+    } else {
+      box.innerHTML = `<div style="color:var(--red)">✗ Failed (${resp.status}): ${escHtml(JSON.stringify(data).substring(0, 300))}</div>`;
+    }
+  } catch (err) {
+    box.innerHTML = `<div style="color:var(--red)">✗ Error: ${escHtml(err.message)}</div>`;
+  }
+};
+
+window.runAccUpdateAsset = async () => {
+  if (!accToken) return alert('Get a token first.');
+  if (!accLastAssetId) return alert('Create an asset first.');
+  showOutput('accAssetsOutput');
+  const box = document.getElementById('accAssetsResult');
+  if (box) box.innerHTML = '<span style="color:var(--muted)">Updating asset...</span>';
+
+  try {
+    const resp = await fetch(`/api/acc/proxy/construction/assets/v2/projects/${accProjectId}/assets:batch-patch`, {
+      method: 'PATCH',
+      headers: { 'Authorization': `Bearer ${accToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items: [{ id: accLastAssetId, displayName: 'Updated Asset (Tutorial)' }] })
+    });
+    box.innerHTML = resp.ok
+      ? '<div style="color:var(--green);font-weight:bold">✅ Asset updated!</div>'
+      : `<div style="color:var(--red)">✗ Failed (${resp.status})</div>`;
+  } catch (err) {
+    box.innerHTML = `<div style="color:var(--red)">✗ Error: ${escHtml(err.message)}</div>`;
+  }
+};
+
+window.runAccDeleteAsset = async () => {
+  if (!accToken) return alert('Get a token first.');
+  if (!accLastAssetId) return alert('Create an asset first.');
+  showOutput('accAssetsOutput');
+  const box = document.getElementById('accAssetsResult');
+  if (box) box.innerHTML = '<span style="color:var(--muted)">Deleting asset...</span>';
+
+  try {
+    const resp = await fetch(`/api/acc/proxy/construction/assets/v2/projects/${accProjectId}/assets:batch-delete`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${accToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids: [accLastAssetId] })
+    });
+    if (resp.ok || resp.status === 204) {
+      accLastAssetId = '';
+      box.innerHTML = '<div style="color:var(--green);font-weight:bold">✅ Asset deleted!</div>';
+    } else {
+      box.innerHTML = `<div style="color:var(--red)">✗ Failed (${resp.status})</div>`;
+    }
+  } catch (err) {
+    box.innerHTML = `<div style="color:var(--red)">✗ Error: ${escHtml(err.message)}</div>`;
+  }
+};
+
+/* ── ACC: Revit + Assets Demos ─────────────────────────────────────────────── */
+
+window.runAccRevitManifest = async () => {
+  if (!accToken) return alert('Get a token first.');
+  const urn = document.getElementById('accRevitUrn')?.value?.trim();
+  if (!urn) return alert('Enter a base64-encoded URN of a translated Revit file.');
+  showOutput('accRevitOutput');
+  const box = document.getElementById('accRevitResult');
+  if (box) box.innerHTML = '<span style="color:var(--muted)">Checking translation status...</span>';
+
+  try {
+    const resp = await fetch(`/api/acc/proxy/modelderivative/v2/designdata/${encodeURIComponent(urn)}/manifest`, {
+      headers: { 'Authorization': `Bearer ${accToken}`, 'Content-Type': 'application/json' }
+    });
+    const data = await resp.json();
+    if (resp.ok) {
+      const statusColor = data.status === 'success' ? 'var(--green)' : data.status === 'failed' ? 'var(--red)' : 'var(--yellow)';
+      box.innerHTML = `<div style="color:${statusColor};font-weight:bold;margin-bottom:8px">Status: ${escHtml(data.status || 'unknown')}</div>
+        <div style="font-size:13px">Progress: ${escHtml(data.progress || 'N/A')}</div>
+        <pre style="background:var(--mantle);padding:8px;border-radius:4px;font-size:12px;max-height:200px;overflow:auto">${escHtml(JSON.stringify(data, null, 2).substring(0, 1000))}</pre>`;
+    } else {
+      box.innerHTML = `<div style="color:var(--red)">✗ Failed (${resp.status}): ${escHtml(JSON.stringify(data).substring(0, 300))}</div>`;
+    }
+  } catch (err) {
+    box.innerHTML = `<div style="color:var(--red)">✗ Error: ${escHtml(err.message)}</div>`;
+  }
+};
+
+window.runAccRevitProperties = async () => {
+  if (!accToken) return alert('Get a token first.');
+  const urn = document.getElementById('accRevitUrn')?.value?.trim();
+  if (!urn) return alert('Enter a URN first.');
+  showOutput('accRevitOutput');
+  const box = document.getElementById('accRevitResult');
+  if (box) box.innerHTML = '<span style="color:var(--muted)">Fetching metadata...</span>';
+
+  try {
+    // Step 1: Get GUIDs
+    const metaResp = await fetch(`/api/acc/proxy/modelderivative/v2/designdata/${encodeURIComponent(urn)}/metadata`, {
+      headers: { 'Authorization': `Bearer ${accToken}`, 'Content-Type': 'application/json' }
+    });
+    const metaData = await metaResp.json();
+
+    if (!metaResp.ok) {
+      box.innerHTML = `<div style="color:var(--red)">✗ Metadata failed (${metaResp.status})</div>`;
+      return;
+    }
+
+    const guids = metaData?.data?.metadata || [];
+    let html = `<div style="color:var(--green);margin-bottom:8px">✅ Found ${guids.length} model view(s)</div>`;
+
+    // Step 2: Get properties from first GUID
+    if (guids.length > 0) {
+      const guid = guids[0].guid;
+      html += `<div style="font-size:13px;margin-bottom:8px">Fetching properties for GUID: ${escHtml(guid)}...</div>`;
+
+      const propsResp = await fetch(`/api/acc/proxy/modelderivative/v2/designdata/${encodeURIComponent(urn)}/metadata/${guid}/properties?limit=5`, {
+        headers: { 'Authorization': `Bearer ${accToken}`, 'Content-Type': 'application/json' }
+      });
+      const propsData = await propsResp.json();
+
+      if (propsResp.ok && propsData?.data?.collection) {
+        const elems = propsData.data.collection;
+        html += `<div style="color:var(--green);margin-bottom:8px">✅ Found ${elems.length} element(s) (showing up to 5)</div>`;
+        elems.slice(0, 5).forEach((el, i) => {
+          html += `<div style="padding:6px 0;border-bottom:1px solid var(--surface1)">
+            <strong>${i+1}. ${escHtml(el.name || 'Unnamed')}</strong>
+            <div style="font-size:12px;color:var(--muted)">externalId: ${escHtml(el.externalId || 'N/A')}</div>
+          </div>`;
+        });
+      }
+    }
+
+    box.innerHTML = html;
+  } catch (err) {
+    box.innerHTML = `<div style="color:var(--red)">✗ Error: ${escHtml(err.message)}</div>`;
+  }
+};
+
+window.runAccRevitLinkAsset = async () => {
+  if (!accToken) return alert('Get a token first.');
+  if (!accProjectId) return alert('List projects first (Demo 2).');
+  showOutput('accRevitOutput');
+  const box = document.getElementById('accRevitResult');
+  if (box) box.innerHTML = '<span style="color:var(--muted)">Creating Revit-linked asset...</span>';
+
+  try {
+    const resp = await fetch(`/api/acc/proxy/construction/assets/v2/projects/${accProjectId}/assets:batch-create`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${accToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        items: [{
+          displayName: 'Revit-Linked Asset (Tutorial Demo)',
+          description: 'Linked to Revit externalId via custom attribute',
+          clientAssetId: 'tutorial-revit-' + Date.now()
+        }]
+      })
+    });
+    const data = await resp.json();
+    if (resp.ok) {
+      const results = data.results || (data.id ? [data] : []);
+      box.innerHTML = `<div style="color:var(--green);font-weight:bold;margin-bottom:8px">✅ Revit-linked asset created!</div>
+        <div style="font-size:13px">ID: ${escHtml(results[0]?.id || 'N/A')}</div>
+        <div style="font-size:13px;margin-top:8px;color:var(--muted)">In production, you'd add custom attributes with the Revit externalId to link this asset to a specific BIM element.</div>`;
+    } else {
+      box.innerHTML = `<div style="color:var(--red)">✗ Failed (${resp.status}): ${escHtml(JSON.stringify(data).substring(0, 300))}</div>`;
+    }
+  } catch (err) {
+    box.innerHTML = `<div style="color:var(--red)">✗ Error: ${escHtml(err.message)}</div>`;
+  }
+};
+
 /* ── Mobile menu ────────────────────────────────────────────────────────────── */
 window.toggleMenu = () => document.querySelector('.sidebar')?.classList.toggle('open');

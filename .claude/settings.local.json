@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:aps.autodesk.com)",
+      "WebFetch(domain:autodesk-developer.zendesk.com)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\seany\\Documents\\All Codes\\API Tutorial"
+    ]
+  }
+}
